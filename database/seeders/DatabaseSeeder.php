@@ -17,7 +17,7 @@ class DatabaseSeeder extends Seeder
     {
         app(PermissionRegistrar::class)->forgetCachedPermissions();
 
-        foreach (['admin', 'op_manager', 'driver', 'operation'] as $role) {
+        foreach (['admin', 'op_manager', 'delivery', 'operation'] as $role) {
             Role::findOrCreate($role, 'web');
         }
 
@@ -31,5 +31,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $admin->syncRoles(['admin']);
+
+        $this->call(ConceptSeeder::class);
     }
 }

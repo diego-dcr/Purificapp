@@ -11,6 +11,8 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 #[Layout('layouts.app')]
 #[Title('Usuarios')]
@@ -33,6 +35,9 @@ class Index extends Component
     public string $role = 'operation';
 
     public string $password = '';
+
+    /** @var array<string> */
+    public array $directPermissions = [];
 
     public bool $showForm = false;
 
@@ -64,6 +69,7 @@ class Index extends Component
         $this->email = $user->email;
         $this->role = $user->roles->pluck('name')->first() ?? 'operation';
         $this->password = '';
+        $this->directPermissions = $user->getDirectPermissions()->pluck('name')->toArray();
         $this->showForm = true;
 
         $this->resetValidation();
@@ -96,6 +102,7 @@ class Index extends Component
         }
 
         $user->syncRoles([$validated['role']]);
+        $user->syncPermissions($this->directPermissions);
 
         session()->flash('status', $message);
 
@@ -161,6 +168,7 @@ class Index extends Component
         $this->email = '';
         $this->role = 'operation';
         $this->password = '';
+        $this->directPermissions = [];
         $this->showForm = false;
     }
 
@@ -196,6 +204,26 @@ class Index extends Component
     #[Computed]
     public function availableRoles(): array
     {
-        return ['admin', 'op_manager', 'driver', 'operation'];
+        return Role::orderBy('name')->pluck('name')->toArray();
+    }
+
+    #[Computed]
+    public function rolePermissions(): array
+    {
+        if ($this->role === '') {
+            return [];
+        }
+
+        $role = Role::findByName($this->role, 'web');
+
+        return $role ? $role->permissions->pluck('name')->toArray() : [];
+    }
+
+    #[Computed]
+    public function extraPermissions(): \Illuminate\Database\Eloquent\Collection
+    {
+        return Permission::whereNotIn('name', $this->rolePermissions())
+            ->orderBy('name')
+            ->get();
     }
 }

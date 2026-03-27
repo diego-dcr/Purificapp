@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "10d204e9-160b-4fa4-9621-0ca77e897f92"
+      }
+    },
+    "android": {
+      "package": "com.diegodcr.puriarcoiris"
+    }
+  }
+}

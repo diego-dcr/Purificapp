@@ -32,10 +32,10 @@
 
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
                     <div class="min-w-72">
-                        <flux:input wire:model.live.debounce.300ms="search" label="Buscar" type="text" placeholder="Nombre, usuario o correo" />
+                        <flux:input wire:model.live.debounce.300ms="search" label="Buscar" type="text" size="sm" placeholder="Nombre, usuario o correo" />
                     </div>
 
-                    <flux:button variant="primary" wire:click="create">Nuevo usuario</flux:button>
+                    <flux:button variant="primary" color="sky" size="sm" icon="plus" wire:click="create">Nuevo usuario</flux:button>
                 </div>
             </div>
 
@@ -77,13 +77,20 @@
                                     </td>
                                     <td class="px-4 py-3 align-top">
                                         <div class="flex justify-end gap-2">
-                                            <flux:button size="sm" variant="ghost" wire:click="edit({{ $user->id }})">
+                                            <flux:button
+                                                size="sm"
+                                                icon="pencil-square"
+                                                variant="filled"
+                                                class="bg-zinc-500 hover:bg-zinc-600"
+                                                wire:click="edit({{ $user->id }})"
+                                            >
                                                 Editar
                                             </flux:button>
 
                                             @if (auth()->id() !== $user->id)
                                                 <flux:button
                                                     size="sm"
+                                                    icon="trash"
                                                     variant="danger"
                                                     wire:click="delete({{ $user->id }})"
                                                 >
@@ -118,10 +125,6 @@
                         {{ $editingUserId ? 'Actualiza la información y el rol asignado.' : 'Captura los datos básicos del nuevo usuario.' }}
                     </flux:text>
                 </div>
-
-                @if ($showForm)
-                    <flux:button variant="ghost" wire:click="cancel">Cancelar</flux:button>
-                @endif
             </div>
 
             @if (! $showForm)
@@ -131,9 +134,7 @@
             @else
                 <form wire:submit="save" class="mt-6 space-y-5">
                     <flux:input wire:model="name" label="Nombre" type="text" required />
-
                     <flux:input wire:model="username" label="Usuario" type="text" required placeholder="admin.ddcr" />
-
                     <flux:input wire:model="email" label="Correo" type="email" required placeholder="usuario@water" />
 
                     <div>
@@ -155,9 +156,53 @@
                         viewable
                     />
 
+                    @if ($editingUserId)
+                        <div>
+                            <label class="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                                Permisos del rol
+                            </label>
+                            @if (count($this->rolePermissions) > 0)
+                                <div class="flex flex-wrap gap-1.5 rounded-lg border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-700 dark:bg-zinc-800/50">
+                                    @foreach ($this->rolePermissions as $rp)
+                                        <span class="inline-flex rounded-full bg-violet-100 px-2.5 py-0.5 text-xs font-medium text-violet-700 dark:bg-violet-950/60 dark:text-violet-300">
+                                            {{ $rp }}
+                                        </span>
+                                    @endforeach
+                                </div>
+                                <p class="mt-1.5 text-xs text-zinc-400 dark:text-zinc-500">Heredados del rol. Para modificarlos, edita el rol directamente.</p>
+                            @else
+                                <p class="text-sm text-zinc-400 dark:text-zinc-500">El rol seleccionado no tiene permisos asignados.</p>
+                            @endif
+                        </div>
+
+                        @if ($this->extraPermissions->isNotEmpty())
+                            <div>
+                                <label class="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                                    Permisos adicionales
+                                </label>
+                                <p class="mb-2 text-xs text-zinc-400 dark:text-zinc-500">Concede permisos extra a este usuario por encima de su rol.</p>
+                                <div class="max-h-48 overflow-y-auto rounded-lg border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-700 dark:bg-zinc-800/50">
+                                    <div class="grid gap-1.5 sm:grid-cols-2">
+                                        @foreach ($this->extraPermissions as $extraPerm)
+                                            <label class="flex cursor-pointer items-center gap-2 rounded-lg p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-700/50">
+                                                <input
+                                                    type="checkbox"
+                                                    wire:model="directPermissions"
+                                                    value="{{ $extraPerm->name }}"
+                                                    class="h-4 w-4 rounded border-zinc-300 text-sky-600 focus:ring-sky-500 dark:border-zinc-600"
+                                                />
+                                                <span class="text-sm text-zinc-700 dark:text-zinc-300">{{ $extraPerm->name }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+                    @endif
+
                     <div class="flex justify-end gap-3">
-                        <flux:button variant="ghost" type="button" wire:click="cancel">Cancelar</flux:button>
-                        <flux:button variant="primary" type="submit">
+                        <flux:button type="button" size="sm" variant="danger" wire:click="cancel">Cancelar</flux:button>
+                        <flux:button variant="primary" color="sky" size="sm" type="submit">
                             {{ $editingUserId ? 'Actualizar usuario' : 'Crear usuario' }}
                         </flux:button>
                     </div>

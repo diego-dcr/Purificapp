@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 // Models
 use App\Models\User;
@@ -24,17 +25,10 @@ class RouteController extends Controller
             'user_id' => 'required|exists:users,id',
             'name' => 'required|string|max:255',
             'zone' => 'required|string|max:255',
+            'code' => 'required|string|max:255|unique:routes,code',
         ]);
 
-        $lastRouteId = Route::max('id') ?? 0;
-
-        // Generate code from name and zone (e.g., "CENTRO-1")
-        $code = strtoupper(substr($validated['zone'], 0, 3) . '-' . substr($validated['name'], 0, 3) . '-' . ($lastRouteId + 1));
-
-        Route::create([
-            ...$validated,
-            'code' => $code,
-        ]);
+        Route::create($validated);
 
         return redirect()->route('routes.index')->with('success', 'Ruta creada exitosamente');
     }
@@ -53,6 +47,12 @@ class RouteController extends Controller
             'user_id' => 'required|exists:users,id',
             'name' => 'required|string|max:255',
             'zone' => 'required|string|max:255',
+            'code' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('routes', 'code')->ignore($route->id),
+            ],
         ]);
 
         $route->update($validated);

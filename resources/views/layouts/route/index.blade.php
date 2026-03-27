@@ -43,15 +43,21 @@
                             zona y repartidor.</p>
                     </div>
 
-                    <div class="flex flex-wrap gap-2 text-xs font-medium">
-                        <span
-                            class="rounded-full bg-emerald-100 px-3 py-1 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300">En
-                            tiempo</span>
-                        <span
-                            class="rounded-full bg-amber-100 px-3 py-1 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300">En
-                            riesgo</span>
-                        <span
-                            class="rounded-full bg-rose-100 px-3 py-1 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300">Retraso</span>
+                    <div class="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
+                        <div class="flex flex-wrap gap-2 text-xs font-medium">
+                            <span
+                                class="rounded-full bg-emerald-100 px-3 py-1 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300">En
+                                tiempo</span>
+                            <span
+                                class="rounded-full bg-amber-100 px-3 py-1 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300">En
+                                riesgo</span>
+                            <span
+                                class="rounded-full bg-rose-100 px-3 py-1 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300">Retraso</span>
+                        </div>
+                        <flux:button type="button" variant="primary" color="sky" size="sm" icon="plus"
+                            onclick="window.location.href='{{ route('routes.index') }}'">
+                            Nueva ruta
+                        </flux:button>
                     </div>
                 </div>
 
@@ -65,35 +71,39 @@
                                 <th class="px-6 py-3 font-medium">Zona</th>
                                 <th class="px-6 py-3 font-medium">Entregas</th>
                                 <th class="px-6 py-3 font-medium">Garrafones</th>
-                                <th class="px-6 py-3 font-medium">Acciones</th>
+                                <th class="px-6 py-3 font-medium text-right">Acciones</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-neutral-200 dark:divide-neutral-700">
-                            @foreach ($routes as $route)
+                            @foreach ($routes as $routeItem)
                                 <tr>
                                     <td class="px-6 py-4 font-medium text-zinc-900 dark:text-zinc-50">
-                                        {{ $route->code }}
+                                        {{ $routeItem->code }}
                                     </td>
-                                    <td class="px-6 py-4 text-zinc-600 dark:text-zinc-300">{{ $route->name }}</td>
-                                    <td class="px-6 py-4 text-zinc-600 dark:text-zinc-300">{{ $route->user->name }}</td>
-                                    <td class="px-6 py-4 text-zinc-600 dark:text-zinc-300">{{ $route->zone }}</td>
+                                    <td class="px-6 py-4 text-zinc-600 dark:text-zinc-300">{{ $routeItem->name }}</td>
+                                    <td class="px-6 py-4 text-zinc-600 dark:text-zinc-300">{{ $routeItem->user->name }}
+                                    </td>
+                                    <td class="px-6 py-4 text-zinc-600 dark:text-zinc-300">{{ $routeItem->zone }}</td>
                                     <td class="px-6 py-4 text-zinc-600 dark:text-zinc-300">-</td>
                                     <td class="px-6 py-4 text-zinc-600 dark:text-zinc-300">-</td>
-                                    <td class="px-6 py-4 flex items-center gap-2">
-                                        <flux:button type="button" icon="pencil-square" size="sm" variant="filled"
-                                            class="bg-zinc-500 hover:bg-zinc-600"
-                                            onclick="window.location.href='{{ route('routes.edit', $route) }}'">
-                                            Editar
-                                        </flux:button>
-
-                                        <form method="POST" action="{{ route('routes.destroy', $route) }}"
-                                            onsubmit="return confirm('¿Seguro que deseas eliminar esta ruta?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <flux:button type="submit" icon="trash" size="sm" variant="danger">
-                                                Eliminar
+                                    <td class="px-6 py-4 align-top">
+                                        <div class="flex justify-end gap-2">
+                                            <flux:button type="button" icon="pencil-square" size="sm"
+                                                variant="filled" class="bg-zinc-500 hover:bg-zinc-600"
+                                                onclick="window.location.href='{{ route('routes.edit', $routeItem) }}'">
+                                                Editar
                                             </flux:button>
-                                        </form>
+
+                                            <form method="POST" action="{{ route('routes.destroy', $routeItem) }}"
+                                                onsubmit="return confirm('¿Seguro que deseas eliminar esta ruta?');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <flux:button type="submit" icon="trash" size="sm"
+                                                    variant="danger">
+                                                    Eliminar
+                                                </flux:button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             @endforeach
@@ -119,19 +129,6 @@
                         @endisset
                     </flux:text>
 
-                    @isset($route)
-                        <div class="mt-3">
-                            <flux:button
-                                type="button"
-                                size="sm"
-                                variant="ghost"
-                                icon="plus"
-                                onclick="window.location.href='{{ route('routes.index') }}'"
-                            >
-                                Crear nueva ruta
-                            </flux:button>
-                        </div>
-                    @endisset
                 </div>
 
                 <form method="POST"
@@ -147,6 +144,9 @@
 
                     <flux:input name="zone" label="Zona" type="text" required placeholder="Centro"
                         value="{{ isset($route) ? $route->zone : '' }}" />
+
+                    <flux:input name="code" label="Código de la ruta" type="text" required
+                        placeholder="CTR-RUT-1" value="{{ isset($route) ? $route->code : '' }}" />
 
                     <div>
                         <label class="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Usuario
@@ -178,6 +178,5 @@
                 </form>
             </aside>
         </section>
-
     </div>
 </x-layouts::app>
