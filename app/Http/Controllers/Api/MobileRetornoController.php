@@ -3,14 +3,14 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Output;
-use App\Models\WaterjugOutput;
+use App\Models\Retorno;
+use App\Models\CarboyOutput;
 use App\Support\MobileApiPayload;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class MobileOutputController extends Controller
+class MobileRetornoController extends Controller
 {
     public function store(Request $request): JsonResponse
     {
@@ -39,8 +39,8 @@ class MobileOutputController extends Controller
             ], 422);
         }
 
-        $waterjugCodes = MobileApiPayload::waterjugCodesFromRequest($request);
-        if ($waterjugCodes === []) {
+        $carboyCodes = MobileApiPayload::carboyCodesFromRequest($request);
+        if ($carboyCodes === []) {
             return response()->json([
                 'success' => false,
                 'error' => 'No se recibieron códigos de garrafón para el retorno',
@@ -51,21 +51,21 @@ class MobileOutputController extends Controller
         $externalId = $request->string('id')->trim()->value() ?: null;
 
         if ($externalId) {
-            $existingOutput = Output::query()->where('external_id', $externalId)->first();
-            if ($existingOutput) {
+            $existingRetorno = Retorno::query()->where('external_id', $externalId)->first();
+            if ($existingRetorno) {
                 return response()->json([
                     'success' => true,
                     'message' => 'Retorno previamente registrado',
                     'registro' => [
-                        'output_id' => $existingOutput->id,
-                        'codigo_retorno' => $existingOutput->external_id,
+                        'retorno_id' => $existingRetorno->id,
+                        'codigo_retorno' => $existingRetorno->external_id,
                     ],
                 ]);
             }
         }
 
-        $output = DB::transaction(function () use ($externalId, $request, $route, $timestamp, $user, $waterjugCodes) {
-            $output = Output::query()->create([
+        $retorno = DB::transaction(function () use ($externalId, $request, $route, $timestamp, $user, $carboyCodes) {
+            $retorno = Retorno::query()->create([
                 'user_id' => $user->id,
                 'route_id' => $route->id,
                 'created_by' => $user->id,
@@ -75,24 +75,24 @@ class MobileOutputController extends Controller
                 'timestamp' => $timestamp,
             ]);
 
-            foreach ($waterjugCodes as $code) {
-                WaterjugOutput::query()->create([
-                    'output_id' => $output->id,
-                    'waterjug_codebar' => $code,
+            foreach ($carboyCodes as $code) {
+                CarboyOutput::query()->create([
+                    'retorno_id' => $retorno->id,
+                    'carboy_codebar' => $code,
                     'timestamp' => $timestamp,
                 ]);
             }
 
-            return $output;
+            return $retorno;
         });
 
         return response()->json([
             'success' => true,
             'message' => 'Retorno registrado correctamente',
             'registro' => [
-                'output_id' => $output->id,
-                'codigo_retorno' => $output->external_id ?: (string) $output->id,
-                'total_garrafones' => count($waterjugCodes),
+                'retorno_id' => $retorno->id,
+                'codigo_retorno' => $retorno->external_id ?: (string) $retorno->id,
+                'total_garrafones' => count($carboyCodes),
             ],
         ]);
     }

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Concept;
-use App\Models\Input;
+use App\Models\Sale;
 use App\Models\SystemIncome;
 use Illuminate\Http\Request;
 
@@ -11,7 +11,7 @@ class IncomeController extends Controller
 {
     public function index()
     {
-        $automaticIncomes = Input::with('concept', 'customer', 'user')
+        $automaticIncomes = Sale::with('concept', 'customer', 'user')
             ->orderByDesc('timestamp')
             ->get();
 
@@ -19,7 +19,7 @@ class IncomeController extends Controller
             ->orderByDesc('timestamp')
             ->get();
 
-        $concepts = Concept::orderBy('name')->get();
+        $concepts = ConceptController::listByType(Concept::TYPE_INCOME);
 
         $totalAutomaticIncome = $automaticIncomes->sum('cost');
         $totalSystemIncome = $systemIncomes->sum('amount');
@@ -50,7 +50,10 @@ class IncomeController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'concept_id' => 'required|exists:concepts,id',
+            'concept_id' => [
+                'required',
+                ConceptController::conceptExistsRule(Concept::TYPE_INCOME),
+            ],
             'description' => 'nullable|string|max:255',
             'amount' => 'required|numeric|min:0',
             'timestamp' => 'nullable|date',
@@ -65,7 +68,7 @@ class IncomeController extends Controller
 
     public function edit(SystemIncome $systemIncome)
     {
-        $automaticIncomes = Input::with('concept', 'customer', 'user')
+        $automaticIncomes = Sale::with('concept', 'customer', 'user')
             ->orderByDesc('timestamp')
             ->get();
 
@@ -73,7 +76,7 @@ class IncomeController extends Controller
             ->orderByDesc('timestamp')
             ->get();
 
-        $concepts = Concept::orderBy('name')->get();
+        $concepts = ConceptController::listByType(Concept::TYPE_INCOME);
 
         $totalAutomaticIncome = $automaticIncomes->sum('cost');
         $totalSystemIncome = $systemIncomes->sum('amount');
@@ -105,7 +108,10 @@ class IncomeController extends Controller
     public function update(Request $request, SystemIncome $systemIncome)
     {
         $validated = $request->validate([
-            'concept_id' => 'required|exists:concepts,id',
+            'concept_id' => [
+                'required',
+                ConceptController::conceptExistsRule(Concept::TYPE_INCOME),
+            ],
             'description' => 'nullable|string|max:255',
             'amount' => 'required|numeric|min:0',
             'timestamp' => 'nullable|date',

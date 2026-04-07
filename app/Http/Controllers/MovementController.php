@@ -2,43 +2,45 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Input;
-use App\Models\Output;
+use App\Models\Retorno;
+use App\Models\Sale;
 
 class MovementController extends Controller
 {
     public function index()
     {
-        $inputs = Input::with('user', 'customer', 'waterjugSales')
+        $sales = Sale::with('user', 'customer', 'carboySales')
             ->orderByDesc('timestamp')
             ->get()
-            ->map(function (Input $input) {
-                $input->waterjug_count = $input->waterjugSales->count();
-                return $input;
+            ->map(function (Sale $sale) {
+                $sale->carboy_count = $sale->carboySales->count();
+
+                return $sale;
             });
 
-        $outputs = Output::with('user', 'route', 'waterjugOutputs')
+        $retornos = Retorno::with('user', 'route', 'carboyRetornos')
             ->orderByDesc('timestamp')
             ->get()
-            ->map(function (Output $output) {
-                $output->waterjug_count = $output->waterjugOutputs->count();
-                return $output;
+            ->map(function (Retorno $retorno) {
+                $retorno->carboy_count = $retorno->carboyRetornos->count();
+
+                return $retorno;
             });
 
-        return view('layouts.movement.index', compact('inputs', 'outputs'));
+        return view('layouts.movement.index', compact('sales', 'retornos'));
     }
 
-    public function showInput(Input $input)
+    public function showSale(Sale $sale)
     {
-        $input->load('user', 'customer', 'route', 'concept', 'waterjugSales');
+        $sale->load('user', 'customer', 'route', 'concept', 'carboySales');
 
-        return view('layouts.movement.show-input', compact('input'));
+        return view('layouts.movement.show-sale', compact('sale'));
     }
 
-    public function showOutput(Output $output)
+    public function showRetorno(Retorno $retorno)
     {
-        $output->load('user', 'route', 'waterjugOutputs');
+        $retorno->load('user', 'route', 'carboyRetornos');
 
-        return view('layouts.movement.show-output', compact('output'));
+        return view('layouts.movement.show-retorno', compact('retorno'));
     }
 }

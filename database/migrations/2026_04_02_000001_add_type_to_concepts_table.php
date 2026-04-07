@@ -11,11 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('waterjug_returns', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('return_id')->constrained('outputs')->onDelete('cascade');
-            $table->string('waterjug_barcode');
-            $table->timestamp('timestamp')->useCurrent();
+        Schema::table('concepts', function (Blueprint $table) {
+            $table->string('type')->default('income')->after('code');
+            $table->index('type');
         });
     }
 
@@ -24,6 +22,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('waterjug_returns');
+        Schema::table('concepts', function (Blueprint $table) {
+            $table->dropIndex(['type']);
+            $table->dropColumn('type');
+        });
     }
 };

@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Livewire\Inputs;
+namespace App\Livewire\Sales;
 
 use App\Models\Concept;
 use App\Models\Customer;
-use App\Models\Input;
+use App\Models\Sale;
 use App\Models\Route;
 use App\Models\User;
-use App\Models\WaterjugSale;
+use App\Models\CarboySale;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -18,7 +18,7 @@ use Livewire\Component;
 #[Title('Entregas / Ventas')]
 class Index extends Component
 {
-    public ?int $editingInputId = null;
+    public ?int $editingSaleId = null;
 
     public string $user_id = '';
 
@@ -31,12 +31,12 @@ class Index extends Component
     public string $concept_id = '';
 
     /** @var array<int, string> */
-    public array $waterjug_codebars = [''];
+    public array $carboy_codebars = [''];
 
     public bool $showForm = false;
 
     public bool $showDetailsModal = false;
-    public $detailsInput = null;
+    public $detailsSale = null;
 
     public function create(): void
     {
@@ -44,42 +44,42 @@ class Index extends Component
         $this->showForm = true;
     }
 
-    public function edit(int $inputId): void
+    public function edit(int $saleId): void
     {
-        $input = Input::with('waterjugSales')->findOrFail($inputId);
+        $sale = Sale::with('carboySales')->findOrFail($saleId);
 
-        $this->editingInputId = $input->id;
-        $this->user_id = (string) $input->user_id;
-        $this->route_id = $input->route_id ? (string) $input->route_id : '';
-        $this->customer_id = (string) $input->customer_id;
-        $this->cost = (string) $input->cost;
-        $this->concept_id = (string) $input->concept_id;
-        $this->waterjug_codebars = $input->waterjugSales
-            ->pluck('waterjug_codebar')
+        $this->editingSaleId = $sale->id;
+        $this->user_id = (string) $sale->user_id;
+        $this->route_id = $sale->route_id ? (string) $sale->route_id : '';
+        $this->customer_id = (string) $sale->customer_id;
+        $this->cost = (string) $sale->cost;
+        $this->concept_id = (string) $sale->concept_id;
+        $this->carboy_codebars = $sale->carboySales
+            ->pluck('carboy_codebar')
             ->values()
             ->toArray();
 
-        if ($this->waterjug_codebars === []) {
-            $this->waterjug_codebars = [''];
+        if ($this->carboy_codebars === []) {
+            $this->carboy_codebars = [''];
         }
 
         $this->showForm = true;
         $this->resetValidation();
     }
 
-    public function addWaterjugInput(): void
+    public function addCarboyInput(): void
     {
-        $this->waterjug_codebars[] = '';
+        $this->carboy_codebars[] = '';
     }
 
-    public function removeWaterjugInput(int $index): void
+    public function removeCarboyInput(int $index): void
     {
-        if (count($this->waterjug_codebars) <= 1) {
+        if (count($this->carboy_codebars) <= 1) {
             return;
         }
 
-        unset($this->waterjug_codebars[$index]);
-        $this->waterjug_codebars = array_values($this->waterjug_codebars);
+        unset($this->carboy_codebars[$index]);
+        $this->carboy_codebars = array_values($this->carboy_codebars);
     }
 
     public function save(): void
@@ -90,8 +90,8 @@ class Index extends Component
             'customer_id' => 'required|exists:customers,id',
             'cost' => 'required|numeric|min:0',
             'concept_id' => 'required|exists:concepts,id',
-            'waterjug_codebars' => 'nullable|array',
-            'waterjug_codebars.*' => 'nullable|string|max:255',
+            'carboy_codebars' => 'nullable|array',
+            'carboy_codebars.*' => 'nullable|string|max:255',
         ]);
 
         $payload = [
@@ -103,26 +103,26 @@ class Index extends Component
             'created_by' => Auth::id(),
         ];
 
-        if ($this->editingInputId) {
-            $input = Input::findOrFail($this->editingInputId);
-            $input->update($payload);
-            $input->waterjugSales()->delete();
+        if ($this->editingSaleId) {
+            $sale = Sale::findOrFail($this->editingSaleId);
+            $sale->update($payload);
+            $sale->carboySales()->delete();
             $message = 'Entrega/Venta actualizada exitosamente';
         } else {
             $payload['timestamp'] = now();
-            $input = Input::create($payload);
+            $sale = Sale::create($payload);
             $message = 'Entrega/Venta registrada exitosamente';
         }
 
-        $codebars = collect($validated['waterjug_codebars'] ?? [])
+        $codebars = collect($validated['carboy_codebars'] ?? [])
             ->map(fn($codebar) => trim((string) $codebar))
             ->filter()
             ->values();
 
         foreach ($codebars as $codebar) {
-            WaterjugSale::create([
-                'input_id' => $input->id,
-                'waterjug_codebar' => $codebar,
+            CarboySale::create([
+                'sale_id' => $sale->id,
+                'carboy_codebar' => $codebar,
                 'timestamp' => now(),
             ]);
         }
@@ -131,13 +131,13 @@ class Index extends Component
         $this->resetForm();
     }
 
-    public function delete(int $inputId): void
+    public function delete(int $saleId): void
     {
-        $input = Input::findOrFail($inputId);
-        $input->waterjugSales()->delete();
-        $input->delete();
+        $sale = Sale::findOrFail($saleId);
+        $sale->carboySales()->delete();
+        $sale->delete();
 
-        if ($this->editingInputId === $inputId) {
+        if ($this->editingSaleId === $saleId) {
             $this->resetForm();
         }
 
@@ -153,26 +153,26 @@ class Index extends Component
     {
         $this->resetValidation();
 
-        $this->editingInputId = null;
+        $this->editingSaleId = null;
         $this->user_id = '';
         $this->route_id = '';
         $this->customer_id = '';
         $this->cost = '';
         $this->concept_id = '';
-        $this->waterjug_codebars = [''];
+        $this->carboy_codebars = [''];
         $this->showForm = false;
     }
 
     #[Computed]
-    public function inputs()
+    public function sales()
     {
-        return Input::with('user', 'route', 'customer', 'concept', 'waterjugSales')
+        return Sale::with('user', 'route', 'customer', 'concept', 'carboySales')
             ->orderByDesc('timestamp')
             ->get()
-            ->map(function ($input) {
-                $input->waterjug_count = $input->waterjugSales->count();
+            ->map(function ($sale) {
+                $sale->carboy_count = $sale->carboySales->count();
 
-                return $input;
+                return $sale;
             });
     }
 
@@ -200,16 +200,16 @@ class Index extends Component
         return Concept::orderBy('name')->get();
     }
 
-public function showDetails($inputId)
+public function showDetails($saleId)
 {
-    $this->detailsInput = Input::with(['user', 'route', 'customer', 'concept', 'waterjugSales'])
-        ->findOrFail($inputId);
+    $this->detailsSale = Sale::with(['user', 'route', 'customer', 'concept', 'carboySales'])
+        ->findOrFail($saleId);
     $this->showDetailsModal = true;
 }
 
     public function closeDetails()
     {
         $this->showDetailsModal = false;
-        $this->detailsInput = null;
+        $this->detailsSale = null;
     }
 }

@@ -21,8 +21,8 @@ class Lot extends Model
         'updated_at',
     ];
 
-    public function waterjugs(): HasMany
+    public function carboys(): HasMany
     {
-        return $this->hasMany(Waterjug::class, 'lot_id');
+        return $this->hasMany(Carboy::class, 'lot_id');
     }
 }

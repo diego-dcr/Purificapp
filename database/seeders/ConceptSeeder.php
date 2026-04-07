@@ -74,7 +74,10 @@ class ConceptSeeder extends Seeder
         foreach ($concepts as $concept) {
             Concept::updateOrCreate(
                 ['code' => $concept['code']],
-                ['name' => $concept['name']],
+                [
+                    'name' => $concept['name'],
+                    'type' => Concept::TYPE_INCOME,
+                ],
             );
         }
     }

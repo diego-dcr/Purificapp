@@ -10,7 +10,7 @@ class ExpenseController extends Controller
 {
     public function index()
     {
-        $concepts = Concept::orderBy('name')->get();
+        $concepts = ConceptController::listByType(Concept::TYPE_EXPENSE);
         $expenses = Expense::with('concept')->orderByDesc('timestamp')->get();
         $totalExpense = $expenses->sum('amount');
 
@@ -20,7 +20,10 @@ class ExpenseController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'concept_id' => 'required|exists:concepts,id',
+            'concept_id' => [
+                'required',
+                ConceptController::conceptExistsRule(Concept::TYPE_EXPENSE),
+            ],
             'amount' => 'required|numeric|min:0',
             'description' => 'nullable|string|max:255',
             'timestamp' => 'nullable|date',
@@ -35,7 +38,7 @@ class ExpenseController extends Controller
 
     public function edit(Expense $expense)
     {
-        $concepts = Concept::orderBy('name')->get();
+        $concepts = ConceptController::listByType(Concept::TYPE_EXPENSE);
         $expenses = Expense::with('concept')->orderByDesc('timestamp')->get();
         $totalExpense = $expenses->sum('amount');
 
@@ -45,7 +48,10 @@ class ExpenseController extends Controller
     public function update(Request $request, Expense $expense)
     {
         $validated = $request->validate([
-            'concept_id' => 'required|exists:concepts,id',
+            'concept_id' => [
+                'required',
+                ConceptController::conceptExistsRule(Concept::TYPE_EXPENSE),
+            ],
             'amount' => 'required|numeric|min:0',
             'description' => 'nullable|string|max:255',
             'timestamp' => 'nullable|date',

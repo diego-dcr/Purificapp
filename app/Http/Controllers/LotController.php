@@ -9,7 +9,7 @@ class LotController extends Controller
 {
     public function index()
     {
-        $lots = Lot::withCount('waterjugs')->orderByDesc('id')->get();
+        $lots = Lot::withCount('carboys')->orderByDesc('id')->get();
 
         return view('layouts.lot.index', compact('lots'));
     }
@@ -32,7 +32,7 @@ class LotController extends Controller
 
     public function edit(Lot $lot)
     {
-        $lots = Lot::withCount('waterjugs')->orderByDesc('id')->get();
+        $lots = Lot::withCount('carboys')->orderByDesc('id')->get();
 
         return view('layouts.lot.index', compact('lots', 'lot'));
     }

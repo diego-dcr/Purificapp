@@ -12,7 +12,7 @@
             <article
                 class="rounded-xl border border-neutral-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-zinc-900">
                 <p class="text-sm text-zinc-500 dark:text-zinc-400">Garrafones en lotes</p>
-                <p class="mt-3 text-3xl font-semibold text-zinc-900 dark:text-zinc-50">{{ $lots->sum('waterjugs_count') }}</p>
+                <p class="mt-3 text-3xl font-semibold text-zinc-900 dark:text-zinc-50">{{ $lots->sum('carboys_count') }}</p>
                 <p class="mt-1 text-sm text-sky-600 dark:text-sky-400">Inventario asociado</p>
             </article>
         </section>

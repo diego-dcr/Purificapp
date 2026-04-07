@@ -144,7 +144,7 @@ class MobileApiPayload
         return null;
     }
 
-    public static function waterjugCodesFromRequest(Request $request): array
+    public static function carboyCodesFromRequest(Request $request): array
     {
         $codes = [];
 

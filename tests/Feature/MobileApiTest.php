@@ -97,6 +97,6 @@ class MobileApiTest extends TestCase
             ->assertJsonPath('message', 'Entrega previamente registrada');
 
         $this->assertDatabaseCount('inputs', 1);
-        $this->assertDatabaseCount('waterjug_sales', 2);
+        $this->assertDatabaseCount('carboy_sales', 2);
     }
 }

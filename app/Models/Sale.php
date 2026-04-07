@@ -6,9 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Input extends Model
+class Sale extends Model
 {
-    protected $table = 'inputs';
+    protected $table = 'sales';
 
     public $timestamps = false;
 
@@ -50,8 +50,8 @@ class Input extends Model
         return $this->belongsTo(Concept::class);
     }
 
-    public function waterjugSales(): HasMany
+    public function carboySales(): HasMany
     {
-        return $this->hasMany(WaterjugSale::class, 'input_id');
+        return $this->hasMany(CarboySale::class, 'sale_id');
     }
 }

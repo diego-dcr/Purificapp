@@ -1,9 +1,9 @@
 <?php
 
 use App\Livewire\Permissions\Index as PermissionsIndex;
-use App\Livewire\Inputs\Index as InputsIndex;
+use App\Livewire\Retornos\Index as RetornosIndex;
 use App\Livewire\Movements\Index as MovementsIndex;
-use App\Livewire\Outputs\Index as OutputsIndex;
+use App\Livewire\Sales\Index as SalesIndex;
 use App\Livewire\Roles\Index as RolesIndex;
 use App\Livewire\Users\Index as UsersIndex;
 use Illuminate\Support\Facades\Route;
@@ -15,7 +15,7 @@ use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\IncomeController;
 use App\Http\Controllers\LotController;
 use App\Http\Controllers\RouteController;
-use App\Http\Controllers\WaterjugController;
+use App\Http\Controllers\CarboyController;
 
 Route::view('/', 'welcome')->name('home');
 
@@ -49,16 +49,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('concepts/{concept}', 'destroy')->name('destroy');
     });
 
-    Route::controller(ConceptController::class)->name('concepts.')->group(function () {
-        Route::get('concepts', 'index')->name('index');
-        Route::post('concepts', 'store')->name('store');
-        Route::get('concepts/{concept}', 'edit')->name('edit');
-        Route::put('concepts/{concept}', 'update')->name('update');
-        Route::delete('concepts/{concept}', 'destroy')->name('destroy');
-    });
-
-    Route::livewire('outputs', OutputsIndex::class)->name('outputs.index');
-    Route::livewire('inputs', InputsIndex::class)->name('inputs.index');
+    Route::livewire('retornos', RetornosIndex::class)->name('retornos.index');
+    Route::livewire('sales', SalesIndex::class)->name('sales.index');
 
     Route::controller(LotController::class)->name('lots.')->group(function () {
         Route::get('lots', 'index')->name('index');
@@ -68,12 +60,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('lots/{lot}', 'destroy')->name('destroy');
     });
 
-    Route::controller(WaterjugController::class)->name('waterjugs.')->group(function () {
-        Route::get('waterjugs', 'index')->name('index');
-        Route::post('waterjugs', 'store')->name('store');
-        Route::get('waterjugs/{waterjug}', 'edit')->name('edit');
-        Route::put('waterjugs/{waterjug}', 'update')->name('update');
-        Route::delete('waterjugs/{waterjug}', 'destroy')->name('destroy');
+    Route::controller(CarboyController::class)->name('carboys.')->group(function () {
+        Route::get('carboys', 'index')->name('index');
+        Route::post('carboys', 'store')->name('store');
+        Route::get('carboys/{carboy}', 'edit')->name('edit');
+        Route::put('carboys/{carboy}', 'update')->name('update');
+        Route::delete('carboys/{carboy}', 'destroy')->name('destroy');
     });
 
     Route::livewire('movements', MovementsIndex::class)->name('movements.index');

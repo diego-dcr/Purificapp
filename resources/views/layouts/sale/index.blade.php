@@ -3,14 +3,14 @@
 
         <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <article class="rounded-xl border border-neutral-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-zinc-900">
-                <p class="text-sm text-zinc-500 dark:text-zinc-400">Registros de entrega/venta</p>
-                <p class="mt-3 text-3xl font-semibold text-zinc-900 dark:text-zinc-50">{{ count($inputs) }}</p>
+                <p class="text-sm text-zinc-500 dark:text-zinc-400">Registros de venta</p>
+                <p class="mt-3 text-3xl font-semibold text-zinc-900 dark:text-zinc-50">{{ count($sales) }}</p>
                 <p class="mt-1 text-sm text-emerald-600 dark:text-emerald-400">Total en el sistema</p>
             </article>
 
             <article class="rounded-xl border border-neutral-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-zinc-900">
                 <p class="text-sm text-zinc-500 dark:text-zinc-400">Garrafones escaneados</p>
-                <p class="mt-3 text-3xl font-semibold text-zinc-900 dark:text-zinc-50">{{ $inputs->sum('waterjug_count') }}</p>
+                <p class="mt-3 text-3xl font-semibold text-zinc-900 dark:text-zinc-50">{{ $sales->sum('carboy_count') }}</p>
                 <p class="mt-1 text-sm text-sky-600 dark:text-sky-400">Total agregado</p>
             </article>
 
@@ -31,12 +31,12 @@
             <div class="rounded-xl border border-neutral-200 bg-white shadow-sm dark:border-neutral-700 dark:bg-zinc-900">
                 <div class="flex flex-col gap-4 border-b border-neutral-200 px-6 py-5 dark:border-neutral-700 md:flex-row md:items-end md:justify-between">
                     <div>
-                        <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50">Gestión de entregas/ventas</h2>
-                        <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Administra ventas, entregas y garrafones escaneados por cliente.</p>
+                        <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50">Gestión de ventas</h2>
+                        <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Administra ventas y garrafones escaneados por cliente.</p>
                     </div>
 
                     <flux:button type="button" variant="primary" color="sky" size="sm" icon="plus"
-                        onclick="window.location.href='{{ route('inputs.index') }}'">
+                        onclick="window.location.href='{{ route('sales.index') }}'">
                         Nuevo registro
                     </flux:button>
                 </div>
@@ -54,29 +54,29 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-neutral-200 dark:divide-neutral-700">
-                            @forelse ($inputs as $inputItem)
+                            @forelse ($sales as $saleItem)
                                 <tr>
                                     <td class="px-6 py-4 text-zinc-900 dark:text-zinc-50">
-                                        <div class="font-medium">{{ $inputItem->customer->name }}</div>
-                                        <div class="text-xs text-zinc-500 dark:text-zinc-400">{{ $inputItem->customer->number }}</div>
+                                        <div class="font-medium">{{ $saleItem->customer->name }}</div>
+                                        <div class="text-xs text-zinc-500 dark:text-zinc-400">{{ $saleItem->customer->number }}</div>
                                     </td>
-                                    <td class="px-6 py-4 text-zinc-600 dark:text-zinc-300">{{ $inputItem->concept->name }}</td>
-                                    <td class="px-6 py-4 text-zinc-600 dark:text-zinc-300">$ {{ number_format((float) $inputItem->cost, 2) }}</td>
+                                    <td class="px-6 py-4 text-zinc-600 dark:text-zinc-300">{{ $saleItem->concept->name }}</td>
+                                    <td class="px-6 py-4 text-zinc-600 dark:text-zinc-300">$ {{ number_format((float) $saleItem->cost, 2) }}</td>
                                     <td class="px-6 py-4 text-center text-zinc-600 dark:text-zinc-300">
                                         <span class="inline-flex rounded-full bg-purple-100 px-2.5 py-1 text-xs font-medium text-purple-700 dark:bg-purple-950/70 dark:text-purple-300">
-                                            {{ $inputItem->waterjug_count }}
+                                            {{ $saleItem->carboy_count }}
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4 text-zinc-600 dark:text-zinc-300">{{ $inputItem->timestamp->format('Y-m-d H:i') }}</td>
+                                    <td class="px-6 py-4 text-zinc-600 dark:text-zinc-300">{{ $saleItem->timestamp->format('Y-m-d H:i') }}</td>
                                     <td class="px-6 py-4 align-top">
                                         <div class="flex justify-end gap-2">
                                             <flux:button type="button" icon="pencil-square" size="sm" variant="filled"
                                                 class="bg-zinc-500 hover:bg-zinc-600"
-                                                onclick="window.location.href='{{ route('inputs.edit', $inputItem) }}'">
+                                                onclick="window.location.href='{{ route('sales.edit', $saleItem) }}'">
                                                 Editar
                                             </flux:button>
 
-                                            <form method="POST" action="{{ route('inputs.destroy', $inputItem) }}"
+                                            <form method="POST" action="{{ route('sales.destroy', $saleItem) }}"
                                                 onsubmit="return confirm('¿Seguro que deseas eliminar este registro?');">
                                                 @csrf
                                                 @method('DELETE')
@@ -90,7 +90,7 @@
                             @empty
                                 <tr>
                                     <td colspan="6" class="px-6 py-8 text-center text-zinc-500 dark:text-zinc-400">
-                                        No hay entregas/ventas registradas
+                                        No hay ventas registradas
                                     </td>
                                 </tr>
                             @endforelse
@@ -102,26 +102,26 @@
             <aside class="rounded-xl border border-neutral-200 bg-white p-5 dark:border-neutral-700 dark:bg-zinc-900">
                 <div>
                     <flux:heading size="lg">
-                        @isset($input)
+                        @isset($sale)
                             Editar registro
                         @else
                             Nuevo registro
                         @endisset
                     </flux:heading>
                     <flux:text class="mt-1">
-                        @isset($input)
-                            Actualiza los datos de la entrega/venta.
+                        @isset($sale)
+                            Actualiza los datos de la venta.
                         @else
-                            Registra una nueva entrega/venta y sus garrafones escaneados.
+                            Registra una nueva venta y sus garrafones escaneados.
                         @endisset
                     </flux:text>
                 </div>
 
                 <form method="POST"
-                    action="@isset($input){{ route('inputs.update', $input) }}@else{{ route('inputs.store') }}@endisset"
+                    action="@isset($sale){{ route('sales.update', $sale) }}@else{{ route('sales.store') }}@endisset"
                     class="mt-6 space-y-5">
                     @csrf
-                    @isset($input)
+                    @isset($sale)
                         @method('PUT')
                     @endisset
 
@@ -131,7 +131,7 @@
                             class="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-xs outline-none transition focus:border-zinc-400 focus:ring-2 focus:ring-accent focus:ring-offset-2 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-zinc-600 dark:focus:ring-offset-zinc-900">
                             <option value="">Selecciona un usuario</option>
                             @foreach ($users as $user)
-                                <option value="{{ $user->id }}" @if (isset($input) && $input->user_id === $user->id) selected @endif>
+                                <option value="{{ $user->id }}" @if (isset($sale) && $sale->user_id === $user->id) selected @endif>
                                     {{ $user->name }}
                                 </option>
                             @endforeach
@@ -147,7 +147,7 @@
                             class="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-xs outline-none transition focus:border-zinc-400 focus:ring-2 focus:ring-accent focus:ring-offset-2 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-zinc-600 dark:focus:ring-offset-zinc-900">
                             <option value="">Selecciona una ruta</option>
                             @foreach ($routes as $route)
-                                <option value="{{ $route->id }}" @if (isset($input) && $input->route_id === $route->id) selected @endif>
+                                <option value="{{ $route->id }}" @if (isset($sale) && $sale->route_id === $route->id) selected @endif>
                                     {{ $route->name }} ({{ $route->zone }})
                                 </option>
                             @endforeach
@@ -163,7 +163,7 @@
                             class="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-xs outline-none transition focus:border-zinc-400 focus:ring-2 focus:ring-accent focus:ring-offset-2 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-zinc-600 dark:focus:ring-offset-zinc-900">
                             <option value="">Selecciona un cliente</option>
                             @foreach ($customers as $customer)
-                                <option value="{{ $customer->id }}" @if (isset($input) && $input->customer_id === $customer->id) selected @endif>
+                                <option value="{{ $customer->id }}" @if (isset($sale) && $sale->customer_id === $customer->id) selected @endif>
                                     {{ $customer->name }} ({{ $customer->number }})
                                 </option>
                             @endforeach
@@ -179,7 +179,7 @@
                             class="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-xs outline-none transition focus:border-zinc-400 focus:ring-2 focus:ring-accent focus:ring-offset-2 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-zinc-600 dark:focus:ring-offset-zinc-900">
                             <option value="">Selecciona un concepto</option>
                             @foreach ($concepts as $concept)
-                                <option value="{{ $concept->id }}" @if (isset($input) && $input->concept_id === $concept->id) selected @endif>
+                                <option value="{{ $concept->id }}" @if (isset($sale) && $sale->concept_id === $concept->id) selected @endif>
                                     {{ $concept->name }} ({{ $concept->code }})
                                 </option>
                             @endforeach
@@ -190,40 +190,40 @@
                     </div>
 
                     <flux:input name="cost" label="Costo" type="number" step="0.01" min="0" required
-                        placeholder="0.00" value="{{ isset($input) ? $input->cost : '' }}" />
+                        placeholder="0.00" value="{{ isset($sale) ? $sale->cost : '' }}" />
 
                     <div>
                         <label class="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Códigos de barra escaneados</label>
-                        <div id="waterjug-inputs" class="space-y-2">
-                            @isset($input)
-                                @forelse ($input->waterjugSales as $waterjug)
-                                    <input type="text" name="waterjug_codebars[]"
+                        <div id="carboy-inputs" class="space-y-2">
+                            @isset($sale)
+                                @forelse ($sale->carboySales as $carboy)
+                                    <input type="text" name="carboy_codebars[]"
                                         placeholder="Código de barra"
-                                        value="{{ $waterjug->waterjug_codebar }}"
+                                        value="{{ $carboy->carboy_codebar }}"
                                         class="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-xs outline-none transition focus:border-zinc-400 focus:ring-2 focus:ring-accent focus:ring-offset-2 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-zinc-600 dark:focus:ring-offset-zinc-900" />
                                 @empty
-                                    <input type="text" name="waterjug_codebars[]"
+                                    <input type="text" name="carboy_codebars[]"
                                         placeholder="Código de barra"
                                         class="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-xs outline-none transition focus:border-zinc-400 focus:ring-2 focus:ring-accent focus:ring-offset-2 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-zinc-600 dark:focus:ring-offset-zinc-900" />
                                 @endforelse
                             @else
-                                <input type="text" name="waterjug_codebars[]"
+                                <input type="text" name="carboy_codebars[]"
                                     placeholder="Código de barra"
                                     class="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-xs outline-none transition focus:border-zinc-400 focus:ring-2 focus:ring-accent focus:ring-offset-2 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-zinc-600 dark:focus:ring-offset-zinc-900" />
                             @endisset
                         </div>
-                        <flux:button type="button" size="sm" variant="ghost" class="mt-2" onclick="addWaterjugInput()">
+                        <flux:button type="button" size="sm" variant="ghost" class="mt-2" onclick="addCarboyInput()">
                             + Agregar garrafón
                         </flux:button>
                     </div>
 
                     <div class="flex justify-end gap-3">
                         <flux:button type="button" size="sm" variant="danger"
-                            onclick="window.location.href='{{ route('inputs.index') }}'">
+                            onclick="window.location.href='{{ route('sales.index') }}'">
                             Cancelar
                         </flux:button>
                         <flux:button variant="primary" color="sky" size="sm" type="submit">
-                            @isset($input)
+                            @isset($sale)
                                 Actualizar registro
                             @else
                                 Guardar registro
@@ -236,11 +236,11 @@
     </div>
 
     <script>
-        function addWaterjugInput() {
-            const container = document.getElementById('waterjug-inputs');
+        function addCarboyInput() {
+            const container = document.getElementById('carboy-inputs');
             const input = document.createElement('input');
             input.type = 'text';
-            input.name = 'waterjug_codebars[]';
+            input.name = 'carboy_codebars[]';
             input.placeholder = 'Código de barra';
             input.className = 'block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-xs outline-none transition focus:border-zinc-400 focus:ring-2 focus:ring-accent focus:ring-offset-2 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-zinc-600 dark:focus:ring-offset-zinc-900';
             container.appendChild(input);

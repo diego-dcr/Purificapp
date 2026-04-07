@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('waterjug_sales', function (Blueprint $table) {
+        Schema::create('carboy_retornos', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('input_id')->constrained('inputs')->onDelete('cascade');
-            $table->string('waterjug_barcode');
+            $table->foreignId('retorno_id')->constrained('retornos')->onDelete('cascade');
+            $table->string('carboy_barcode');
             $table->timestamp('timestamp')->useCurrent();
         });
     }
@@ -24,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('waterjug_sales');
+        Schema::dropIfExists('carboy_retornos');
     }
 };

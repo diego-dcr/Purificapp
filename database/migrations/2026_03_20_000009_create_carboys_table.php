@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('waterjugs', function (Blueprint $table) {
+        Schema::create('carboys', function (Blueprint $table) {
             $table->id();
             $table->string('barcode')->unique();
             $table->string('conservation_state');
@@ -34,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('waterjugs');
+        Schema::dropIfExists('carboys');
     }
 };

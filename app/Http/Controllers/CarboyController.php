@@ -3,23 +3,23 @@
 namespace App\Http\Controllers;
 
 use App\Models\Lot;
-use App\Models\Waterjug;
+use App\Models\Carboy;
 use Illuminate\Http\Request;
 
-class WaterjugController extends Controller
+class CarboyController extends Controller
 {
     public function index()
     {
         $lots = Lot::orderBy('lot_number')->get();
-        $waterjugs = Waterjug::with('lot')->orderByDesc('id')->get();
+        $carboys = Carboy::with('lot')->orderByDesc('id')->get();
 
-        return view('layouts.waterjug.index', compact('lots', 'waterjugs'));
+        return view('layouts.carboy.index', compact('lots', 'carboys'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'barcode' => 'required|string|unique:waterjugs,barcode|max:255',
+            'barcode' => 'required|string|unique:carboys,barcode|max:255',
             'conservation_state' => 'required|string|max:255',
             'lot_id' => 'required|exists:lots,id',
             'status' => 'required|in:En_planta,En_ruta,Con_cliente,Retornado,Perdido,Mantenimiento,Retirado',
@@ -28,27 +28,27 @@ class WaterjugController extends Controller
 
         $validated['timestamp'] = $validated['timestamp'] ?? now();
 
-        Waterjug::create($validated);
+        Carboy::create($validated);
 
-        return redirect()->route('waterjugs.index')->with('success', 'Garrafón creado exitosamente');
+        return redirect()->route('carboys.index')->with('success', 'Garrafón creado exitosamente');
     }
 
-    public function edit(Waterjug $waterjug)
+    public function edit(Carboy $carboy)
     {
         $lots = Lot::orderBy('lot_number')->get();
-        $waterjugs = Waterjug::with('lot')->orderByDesc('id')->get();
+        $carboys = Carboy::with('lot')->orderByDesc('id')->get();
 
-        return view('layouts.waterjug.index', compact('lots', 'waterjugs', 'waterjug'));
+        return view('layouts.carboy.index', compact('lots', 'carboys', 'carboy'));
     }
 
-    public function update(Request $request, Waterjug $waterjug)
+    public function update(Request $request, Carboy $carboy)
     {
         $validated = $request->validate([
             'barcode' => [
                 'required',
                 'string',
                 'max:255',
-                \Illuminate\Validation\Rule::unique('waterjugs', 'barcode')->ignore($waterjug->id),
+                \Illuminate\Validation\Rule::unique('carboys', 'barcode')->ignore($carboy->id),
             ],
             'conservation_state' => 'required|string|max:255',
             'lot_id' => 'required|exists:lots,id',
@@ -58,15 +58,15 @@ class WaterjugController extends Controller
 
         $validated['timestamp'] = $validated['timestamp'] ?? now();
 
-        $waterjug->update($validated);
+        $carboy->update($validated);
 
-        return redirect()->route('waterjugs.index')->with('success', 'Garrafón actualizado exitosamente');
+        return redirect()->route('carboys.index')->with('success', 'Garrafón actualizado exitosamente');
     }
 
-    public function destroy(Waterjug $waterjug)
+    public function destroy(Carboy $carboy)
     {
-        $waterjug->delete();
+        $carboy->delete();
 
-        return redirect()->route('waterjugs.index')->with('success', 'Garrafón eliminado exitosamente');
+        return redirect()->route('carboys.index')->with('success', 'Garrafón eliminado exitosamente');
     }
 }

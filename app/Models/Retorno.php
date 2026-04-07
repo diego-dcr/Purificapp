@@ -6,9 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Output extends Model
+class Retorno extends Model
 {
-    protected $table = 'outputs';
+    protected $table = 'retornos';
 
     public $timestamps = false;
 
@@ -36,8 +36,8 @@ class Output extends Model
         return $this->belongsTo(Route::class)->withDefault();
     }
 
-    public function waterjugOutputs(): HasMany
+    public function carboyRetornos(): HasMany
     {
-        return $this->hasMany(WaterjugOutput::class, 'output_id');
+        return $this->hasMany(CarboyOutput::class, 'retorno_id');
     }
 }

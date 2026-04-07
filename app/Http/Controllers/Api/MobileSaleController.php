@@ -3,14 +3,14 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Input;
-use App\Models\WaterjugSale;
+use App\Models\Sale;
+use App\Models\CarboySale;
 use App\Support\MobileApiPayload;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class MobileInputController extends Controller
+class MobileSaleController extends Controller
 {
     public function store(Request $request): JsonResponse
     {
@@ -61,25 +61,25 @@ class MobileInputController extends Controller
         $route = MobileApiPayload::routeFromRequest($request, $user);
         $timestamp = MobileApiPayload::timestampFromRequest($request);
         $externalId = $request->string('id')->trim()->value() ?: null;
-        $waterjugCodes = MobileApiPayload::waterjugCodesFromRequest($request);
+        $carboyCodes = MobileApiPayload::carboyCodesFromRequest($request);
         $cost = (float) ($request->input('monto', $request->input('costo', 0)));
 
         if ($externalId) {
-            $existingInput = Input::query()->where('external_id', $externalId)->first();
-            if ($existingInput) {
+            $existingSale = Sale::query()->where('external_id', $externalId)->first();
+            if ($existingSale) {
                 return response()->json([
                     'success' => true,
                     'message' => 'Entrega previamente registrada',
                     'registro' => [
-                        'input_id' => $existingInput->id,
-                        'codigo_reparto' => $existingInput->external_id,
+                        'sale_id' => $existingSale->id,
+                        'codigo_reparto' => $existingSale->external_id,
                     ],
                 ]);
             }
         }
 
-        $input = DB::transaction(function () use ($concept, $cost, $customer, $externalId, $request, $route, $timestamp, $user, $waterjugCodes) {
-            $input = Input::query()->create([
+        $sale = DB::transaction(function () use ($concept, $cost, $customer, $externalId, $request, $route, $timestamp, $user, $carboyCodes) {
+            $sale = Sale::query()->create([
                 'user_id' => $user->id,
                 'route_id' => $route?->id,
                 'customer_id' => $customer->id,
@@ -92,25 +92,25 @@ class MobileInputController extends Controller
                 'timestamp' => $timestamp,
             ]);
 
-            foreach ($waterjugCodes as $code) {
-                WaterjugSale::query()->create([
-                    'input_id' => $input->id,
-                    'waterjug_codebar' => $code,
+            foreach ($carboyCodes as $code) {
+                CarboySale::query()->create([
+                    'sale_id' => $sale->id,
+                    'carboy_codebar' => $code,
                     'timestamp' => $timestamp,
                 ]);
             }
 
-            return $input;
+            return $sale;
         });
 
         return response()->json([
             'success' => true,
             'message' => 'Entrega registrada correctamente',
             'registro' => [
-                'input_id' => $input->id,
-                'codigo_reparto' => $input->external_id ?: (string) $input->id,
+                'sale_id' => $sale->id,
+                'codigo_reparto' => $sale->external_id ?: (string) $sale->id,
                 'codigo_cliente' => $customer->barcode,
-                'total_garrafones' => count($waterjugCodes),
+                'total_garrafones' => count($carboyCodes),
             ],
         ]);
     }

@@ -34,7 +34,7 @@
                     Escaneo
                 </flux:sidebar.item> --}}
 
-                <flux:sidebar.item icon="truck" :href="route('inputs.index')" :current="request()->routeIs('inputs.*')"
+                <flux:sidebar.item icon="truck" :href="route('sales.index')" :current="request()->routeIs('sales.*')"
                     wire:navigate>
                     Entregas/Ventas
                 </flux:sidebar.item>
@@ -43,9 +43,9 @@
 
         <flux:sidebar.nav>
             <flux:sidebar.group :heading="__('Planta')" class="grid">
-                <flux:sidebar.item icon="arrow-uturn-left" :href="route('outputs.index')"
-                    :current="request()->routeIs('outputs.index')" wire:navigate>
-                    Salidas
+                <flux:sidebar.item icon="arrow-uturn-left" :href="route('retornos.index')"
+                    :current="request()->routeIs('retornos.*')" wire:navigate>
+                    Retornos
                 </flux:sidebar.item>
                 {{-- <flux:sidebar.item icon="wrench-screwdriver" :href="route('dashboard')"
                     :current="request()->routeIs('dashboard')" wire:navigate>
@@ -61,8 +61,8 @@
 
         <flux:sidebar.nav>
             <flux:sidebar.group :heading="__('Inventario')" class="grid">
-                <flux:sidebar.item icon="cube" :href="route('waterjugs.index')"
-                    :current="request()->routeIs('waterjugs.*')" wire:navigate>
+                <flux:sidebar.item icon="cube" :href="route('carboys.index')"
+                    :current="request()->routeIs('carboys.*')" wire:navigate>
                     Garrafones
                 </flux:sidebar.item>
 

@@ -5,15 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class WaterjugOutput extends Model
+class Carboy extends Model
 {
-    protected $table = 'waterjug_outputs';
+    protected $table = 'carboys';
 
     public $timestamps = false;
 
     protected $fillable = [
-        'output_id',
-        'waterjug_codebar',
+        'barcode',
+        'conservation_state',
+        'lot_id',
+        'status',
         'timestamp',
     ];
 
@@ -21,8 +23,8 @@ class WaterjugOutput extends Model
         'timestamp' => 'datetime',
     ];
 
-    public function output(): BelongsTo
+    public function lot(): BelongsTo
     {
-        return $this->belongsTo(Output::class);
+        return $this->belongsTo(Lot::class);
     }
 }

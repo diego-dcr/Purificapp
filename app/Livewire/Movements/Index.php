@@ -2,8 +2,8 @@
 
 namespace App\Livewire\Movements;
 
-use App\Models\Input;
-use App\Models\Output;
+use App\Models\Sale;
+use App\Models\Retorno;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -13,71 +13,71 @@ use Livewire\Component;
 #[Title('Movimientos')]
 class Index extends Component
 {
-    public ?int $selectedInputId = null;
+    public ?int $selectedSaleId = null;
 
-    public ?int $selectedOutputId = null;
+    public ?int $selectedRetornoId = null;
 
-    public function showInputDetails(int $inputId): void
+    public function showSaleDetails(int $saleId): void
     {
-        $this->selectedInputId = $inputId;
-        $this->selectedOutputId = null;
+        $this->selectedSaleId = $saleId;
+        $this->selectedRetornoId = null;
     }
 
-    public function showOutputDetails(int $outputId): void
+    public function showRetornoDetails(int $retornoId): void
     {
-        $this->selectedOutputId = $outputId;
-        $this->selectedInputId = null;
+        $this->selectedRetornoId = $retornoId;
+        $this->selectedSaleId = null;
     }
 
     public function closeDetails(): void
     {
-        $this->selectedInputId = null;
-        $this->selectedOutputId = null;
+        $this->selectedSaleId = null;
+        $this->selectedRetornoId = null;
     }
 
     #[Computed]
-    public function inputs()
+    public function sales()
     {
-        return Input::with('user', 'customer', 'waterjugSales')
+        return Sale::with('user', 'customer', 'carboySales')
             ->orderByDesc('timestamp')
             ->get()
-            ->map(function ($input) {
-                $input->waterjug_count = $input->waterjugSales->count();
+            ->map(function ($sale) {
+                $sale->carboy_count = $sale->carboySales->count();
 
-                return $input;
+                return $sale;
             });
     }
 
     #[Computed]
-    public function outputs()
+    public function retornos()
     {
-        return Output::with('user', 'route', 'waterjugOutputs')
+        return Retorno::with('user', 'route', 'carboyRetornos')
             ->orderByDesc('timestamp')
             ->get()
-            ->map(function ($output) {
-                $output->waterjug_count = $output->waterjugOutputs->count();
+            ->map(function ($retorno) {
+                $retorno->carboy_count = $retorno->carboyRetornos->count();
 
-                return $output;
+                return $retorno;
             });
     }
 
     #[Computed]
-    public function selectedInput(): ?Input
+    public function selectedSale(): ?Sale
     {
-        if (! $this->selectedInputId) {
+        if (! $this->selectedSaleId) {
             return null;
         }
 
-        return Input::with('waterjugSales', 'customer', 'user', 'concept', 'route')->find($this->selectedInputId);
+        return Sale::with('carboySales', 'customer', 'user', 'concept', 'route')->find($this->selectedSaleId);
     }
 
     #[Computed]
-    public function selectedOutput(): ?Output
+    public function selectedRetorno(): ?Retorno
     {
-        if (! $this->selectedOutputId) {
+        if (! $this->selectedRetornoId) {
             return null;
         }
 
-        return Output::with('waterjugOutputs', 'user', 'route')->find($this->selectedOutputId);
+        return Retorno::with('carboyRetornos', 'user', 'route')->find($this->selectedRetornoId);
     }
 }

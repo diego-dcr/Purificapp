@@ -5,15 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class WaterjugSale extends Model
+class CarboySale extends Model
 {
-    protected $table = 'waterjug_sales';
+    protected $table = 'carboy_sales';
 
     public $timestamps = false;
 
     protected $fillable = [
-        'input_id',
-        'waterjug_codebar',
+        'sale_id',
+        'carboy_codebar',
         'timestamp',
     ];
 
@@ -21,8 +21,8 @@ class WaterjugSale extends Model
         'timestamp' => 'datetime',
     ];
 
-    public function input(): BelongsTo
+    public function sale(): BelongsTo
     {
-        return $this->belongsTo(Input::class);
+        return $this->belongsTo(Sale::class);
     }
 }

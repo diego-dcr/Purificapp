@@ -2,16 +2,40 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Exists;
 
 // Models
 use App\Models\Concept;
 
 class ConceptController extends Controller
 {
+    public static function listByType(string $type): Collection
+    {
+        self::assertValidType($type);
+
+        return Concept::where('type', $type)->orderBy('name')->get();
+    }
+
+    public static function conceptExistsRule(string $type): Exists
+    {
+        self::assertValidType($type);
+
+        return Rule::exists('concepts', 'id')->where('type', $type);
+    }
+
+    private static function assertValidType(string $type): void
+    {
+        if (!in_array($type, [Concept::TYPE_INCOME, Concept::TYPE_EXPENSE], true)) {
+            throw new \InvalidArgumentException('Tipo de concepto inválido.');
+        }
+    }
+
     public function index()
     {
-        $concepts = Concept::all();
+        $concepts = Concept::orderBy('name')->get();
 
         return view('layouts.concept.index', compact('concepts'));
     }
@@ -21,6 +45,7 @@ class ConceptController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'code' => 'required|string|unique:concepts,code|max:255',
+            'type' => ['required', Rule::in([Concept::TYPE_INCOME, Concept::TYPE_EXPENSE])],
         ]);
 
         Concept::create($validated);
@@ -30,7 +55,7 @@ class ConceptController extends Controller
 
     public function edit(Concept $concept)
     {
-        $concepts = Concept::all();
+        $concepts = Concept::orderBy('name')->get();
 
         return view('layouts.concept.index', compact('concepts', 'concept'));
     }
@@ -43,8 +68,9 @@ class ConceptController extends Controller
                 'required',
                 'string',
                 'max:255',
-                \Illuminate\Validation\Rule::unique('concepts', 'code')->ignore($concept->id),
+                Rule::unique('concepts', 'code')->ignore($concept->id),
             ],
+            'type' => ['required', Rule::in([Concept::TYPE_INCOME, Concept::TYPE_EXPENSE])],
         ]);
 
         $concept->update($validated);
