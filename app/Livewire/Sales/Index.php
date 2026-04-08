@@ -173,14 +173,10 @@ class Index extends Component
     #[Computed]
     public function sales()
     {
-        return Sale::with('user', 'route', 'customer', 'concept', 'carboySales')
+        return Sale::with('user', 'route', 'customer', 'concept')
+            ->withCount('carboySales as carboy_count')
             ->orderByDesc('timestamp')
-            ->get()
-            ->map(function ($sale) {
-                $sale->carboy_count = $sale->carboySales->count();
-
-                return $sale;
-            });
+            ->get();
     }
 
     #[Computed]
@@ -227,14 +223,15 @@ class Index extends Component
         }
     }
 
-public function showDetails($saleId)
-{
-    $this->detailsSale = Sale::with(['user', 'route', 'customer', 'concept', 'carboySales'])
-        ->findOrFail($saleId);
-    $this->showDetailsModal = true;
-}
+    public function showDetails(int $saleId): void
+    {
+        $this->detailsSale = Sale::with(['user', 'route', 'customer', 'concept', 'carboySales'])
+            ->withCount('carboySales as carboy_count')
+            ->findOrFail($saleId);
+        $this->showDetailsModal = true;
+    }
 
-    public function closeDetails()
+    public function closeDetails(): void
     {
         $this->showDetailsModal = false;
         $this->detailsSale = null;

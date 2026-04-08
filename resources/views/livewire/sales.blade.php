@@ -1,4 +1,4 @@
-<div class="flex w-full flex-1 flex-col gap-6" wire:poll.5s>
+<div class="flex w-full flex-1 flex-col gap-6">
     <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <article class="rounded-xl border border-neutral-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-zinc-900">
             <p class="text-sm text-zinc-500 dark:text-zinc-400">Registros de entrega/venta</p>
@@ -58,7 +58,7 @@
                     </thead>
                     <tbody class="divide-y divide-neutral-200 dark:divide-neutral-700">
                         @forelse ($this->sales as $saleItem)
-                            <tr>
+                            <tr wire:key="sale-row-{{ $saleItem->id }}">
                                 <td class="px-6 py-4 text-zinc-900 dark:text-zinc-50">
                                     <div class="font-medium">{{ $saleItem->customer->name }}</div>
                                     <div class="text-xs text-zinc-500 dark:text-zinc-400">{{ $saleItem->customer->number }}</div>
@@ -72,8 +72,18 @@
                                         <flux:button type="button" icon="pencil-square" size="sm" variant="filled" class="bg-zinc-500 hover:bg-zinc-600" wire:click="edit({{ $saleItem->id }})">
                                             Editar
                                         </flux:button>
-                                        <flux:button type="button" icon="eye" size="sm" variant="primary" color="lime" wire:click="showDetails({{ $saleItem->id }})">
-                                            Ver detalles
+                                        <flux:button
+                                            type="button"
+                                            icon="eye"
+                                            size="sm"
+                                            variant="primary"
+                                            color="lime"
+                                            wire:click="showDetails({{ $saleItem->id }})"
+                                            wire:loading.attr="disabled"
+                                            wire:target="showDetails({{ $saleItem->id }})"
+                                        >
+                                            <span wire:loading.remove wire:target="showDetails({{ $saleItem->id }})">Ver detalles</span>
+                                            <span wire:loading wire:target="showDetails({{ $saleItem->id }})">Cargando...</span>
                                         </flux:button>
                                         <flux:button type="button" icon="trash" size="sm" variant="danger" wire:click="delete({{ $saleItem->id }})" wire:confirm="¿Seguro que deseas eliminar este registro?">
                                             Eliminar
