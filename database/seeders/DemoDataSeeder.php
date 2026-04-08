@@ -9,8 +9,8 @@ use App\Models\Income;
 use App\Models\Route;
 use App\Models\Sale;
 use App\Models\User;
-use Faker\Generator;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class DemoDataSeeder extends Seeder
 {
@@ -19,8 +19,6 @@ class DemoDataSeeder extends Seeder
      */
     public function run(): void
     {
-        $faker = app(Generator::class);
-
         $manager = User::query()->firstOrCreate(
             ['email' => 'manager.demo@water'],
             [
@@ -31,14 +29,30 @@ class DemoDataSeeder extends Seeder
             ],
         );
 
-        $deliveryUsers = User::factory()->count(5)->create();
+        $deliveryUsers = collect();
+        for ($i = 1; $i <= 5; $i++) {
+            $deliveryUsers->push(
+                User::query()->updateOrCreate(
+                    ['email' => 'delivery.demo' . $i . '@water'],
+                    [
+                        'name' => 'Repartidor Demo ' . $i,
+                        'username' => 'delivery.demo' . $i,
+                        'password' => 'password',
+                        'email_verified_at' => now(),
+                    ],
+                )
+            );
+        }
 
         $routes = collect();
         foreach ($deliveryUsers as $index => $deliveryUser) {
             $routes->push(
-                Route::factory()->create([
+                Route::query()->updateOrCreate([
+                    'code' => sprintf('R%03d', $index + 1),
+                ], [
                     'user_id' => $deliveryUser->id,
                     'name' => 'Ruta ' . ($index + 1),
+                    'zone' => 'Zona ' . ($index + 1),
                     'code' => sprintf('R%03d', $index + 1),
                 ])
             );
@@ -46,19 +60,51 @@ class DemoDataSeeder extends Seeder
 
         $customers = collect();
         foreach ($routes as $route) {
-            $customers = $customers->concat(
-                Customer::factory()->count(20)->create(['route_id' => $route->id])
-            );
+            for ($i = 1; $i <= 20; $i++) {
+                $customerNumber = 'R' . $route->id . 'C' . str_pad((string) $i, 3, '0', STR_PAD_LEFT);
+                $customer = Customer::query()->updateOrCreate(
+                    ['number' => $customerNumber],
+                    [
+                        'route_id' => $route->id,
+                        'barcode' => '7' . str_pad((string) ($route->id * 1000 + $i), 12, '0', STR_PAD_LEFT),
+                        'number' => $customerNumber,
+                        'name' => 'Cliente Demo ' . $route->id . '-' . $i,
+                    ],
+                );
+
+                $customers->push($customer);
+            }
         }
 
         // Keep concept catalog balanced for both income and expense entries.
         if (! Concept::query()->where('type', Concept::TYPE_EXPENSE)->exists()) {
-            Concept::factory()->count(8)->create(['type' => Concept::TYPE_EXPENSE]);
+            for ($i = 1; $i <= 8; $i++) {
+                Concept::query()->updateOrCreate(
+                    ['code' => 'E' . str_pad((string) $i, 3, '0', STR_PAD_LEFT)],
+                    [
+                        'name' => 'Egreso demo ' . $i,
+                        'type' => Concept::TYPE_EXPENSE,
+                        'allows_carboy' => false,
+                    ],
+                );
+            }
         }
 
         if (! Concept::query()->where('type', Concept::TYPE_INCOME)->exists()) {
-            Concept::factory()->count(8)->create(['type' => Concept::TYPE_INCOME]);
+            for ($i = 1; $i <= 8; $i++) {
+                Concept::query()->updateOrCreate(
+                    ['code' => 'I' . str_pad((string) $i, 3, '0', STR_PAD_LEFT)],
+                    [
+                        'name' => 'Ingreso demo ' . $i,
+                        'type' => Concept::TYPE_INCOME,
+                        'allows_carboy' => false,
+                    ],
+                );
+            }
         }
+
+        $incomeConceptIds = Concept::query()->where('type', Concept::TYPE_INCOME)->pluck('id')->all();
+        $expenseConceptIds = Concept::query()->where('type', Concept::TYPE_EXPENSE)->pluck('id')->all();
 
         $customersByRoute = $customers->groupBy('route_id');
 
@@ -69,22 +115,44 @@ class DemoDataSeeder extends Seeder
                 continue;
             }
 
-            Sale::factory()->count(80)->create([
-                'user_id' => $route->user_id,
-                'route_id' => $route->id,
+            for ($i = 1; $i <= 80; $i++) {
+                $customer = $routeCustomers->random();
+
+                Sale::query()->create([
+                    'user_id' => $route->user_id,
+                    'route_id' => $route->id,
+                    'customer_id' => $customer->id,
+                    'cost' => random_int(30, 1500),
+                    'concept_id' => $incomeConceptIds[array_rand($incomeConceptIds)],
+                    'created_by' => $manager->id,
+                    'external_id' => 'S-' . Str::upper(Str::random(16)),
+                    'latitude' => (string) (19 + (random_int(0, 350000) / 1000000)),
+                    'longitude' => (string) (-99 - (random_int(0, 350000) / 1000000)),
+                    'timestamp' => now()->subDays(random_int(0, 90))->subMinutes(random_int(0, 1440)),
+                ]);
+            }
+        }
+
+        for ($i = 1; $i <= 50; $i++) {
+            Income::query()->create([
+                'concept_id' => $incomeConceptIds[array_rand($incomeConceptIds)],
+                'customer_id' => random_int(1, 100) <= 75 ? $customers->random()->id : null,
+                'user_id' => random_int(1, 100) <= 70 ? $deliveryUsers->random()->id : null,
+                'amount' => random_int(20, 5000),
+                'description' => 'Ingreso demo ' . $i,
                 'created_by' => $manager->id,
-                'customer_id' => fn () => $routeCustomers->random()->id,
+                'timestamp' => now()->subDays(random_int(0, 90))->subMinutes(random_int(0, 1440)),
             ]);
         }
 
-        Income::factory()->count(50)->create([
-            'created_by' => $manager->id,
-            'customer_id' => fn () => $faker->boolean(75) ? $customers->random()->id : null,
-            'user_id' => fn () => $faker->boolean(70) ? $deliveryUsers->random()->id : null,
-        ]);
-
-        Expense::factory()->count(60)->create([
-            'created_by' => $manager->id,
-        ]);
+        for ($i = 1; $i <= 60; $i++) {
+            Expense::query()->create([
+                'concept_id' => $expenseConceptIds[array_rand($expenseConceptIds)],
+                'amount' => random_int(20, 3000),
+                'description' => 'Egreso demo ' . $i,
+                'created_by' => $manager->id,
+                'timestamp' => now()->subDays(random_int(0, 90))->subMinutes(random_int(0, 1440)),
+            ]);
+        }
     }
 }
