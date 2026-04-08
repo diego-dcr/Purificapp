@@ -8,6 +8,7 @@ use App\Models\Income;
 use App\Models\Sale;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Maatwebsite\Excel\Facades\Excel;
 
 class DashboardController extends Controller
@@ -30,6 +31,8 @@ class DashboardController extends Controller
 
         $monthExpr = $this->monthExpression('timestamp');
         $yearExpr = $this->yearExpression('timestamp');
+        $hasIncomesTable = Schema::hasTable('incomes');
+        $hasExpensesTable = Schema::hasTable('expenses');
 
         $salesByMonth = Sale::query()
             ->selectRaw($monthExpr . ' as month_number, COUNT(*) as total')
@@ -37,17 +40,21 @@ class DashboardController extends Controller
             ->groupByRaw($monthExpr)
             ->pluck('total', 'month_number');
 
-        $manualIncomeByMonth = Income::query()
-            ->selectRaw($monthExpr . ' as month_number, COUNT(*) as total')
-            ->whereYear('timestamp', $monthlyYear)
-            ->groupByRaw($monthExpr)
-            ->pluck('total', 'month_number');
+        $manualIncomeByMonth = $hasIncomesTable
+            ? Income::query()
+                ->selectRaw($monthExpr . ' as month_number, COUNT(*) as total')
+                ->whereYear('timestamp', $monthlyYear)
+                ->groupByRaw($monthExpr)
+                ->pluck('total', 'month_number')
+            : collect();
 
-        $expenseByMonth = Expense::query()
-            ->selectRaw($monthExpr . ' as month_number, COUNT(*) as total')
-            ->whereYear('timestamp', $monthlyYear)
-            ->groupByRaw($monthExpr)
-            ->pluck('total', 'month_number');
+        $expenseByMonth = $hasExpensesTable
+            ? Expense::query()
+                ->selectRaw($monthExpr . ' as month_number, COUNT(*) as total')
+                ->whereYear('timestamp', $monthlyYear)
+                ->groupByRaw($monthExpr)
+                ->pluck('total', 'month_number')
+            : collect();
 
         $monthLabels = [
             'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
@@ -63,9 +70,11 @@ class DashboardController extends Controller
         }
 
         $totalIncome = (float) Sale::whereBetween('timestamp', [$totalsFromDate, $totalsToDate])->sum('cost')
-            + (float) Income::whereBetween('timestamp', [$totalsFromDate, $totalsToDate])->sum('amount');
+            + ($hasIncomesTable ? (float) Income::whereBetween('timestamp', [$totalsFromDate, $totalsToDate])->sum('amount') : 0.0);
 
-        $totalExpense = (float) Expense::whereBetween('timestamp', [$totalsFromDate, $totalsToDate])->sum('amount');
+        $totalExpense = $hasExpensesTable
+            ? (float) Expense::whereBetween('timestamp', [$totalsFromDate, $totalsToDate])->sum('amount')
+            : 0.0;
 
         $topCustomers = DB::table('sales')
             ->join('customers', 'customers.id', '=', 'sales.customer_id')
@@ -88,8 +97,8 @@ class DashboardController extends Controller
 
         $availableYears = collect([
             Sale::query()->selectRaw($yearExpr . ' as year_value')->pluck('year_value'),
-            Income::query()->selectRaw($yearExpr . ' as year_value')->pluck('year_value'),
-            Expense::query()->selectRaw($yearExpr . ' as year_value')->pluck('year_value'),
+            $hasIncomesTable ? Income::query()->selectRaw($yearExpr . ' as year_value')->pluck('year_value') : collect(),
+            $hasExpensesTable ? Expense::query()->selectRaw($yearExpr . ' as year_value')->pluck('year_value') : collect(),
         ])->flatten()
             ->filter()
             ->unique()
