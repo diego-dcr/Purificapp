@@ -36,8 +36,9 @@ class ConceptController extends Controller
     public function index()
     {
         $concepts = Concept::orderBy('name')->get();
+        $movementTypes = Concept::movementTypes();
 
-        return view('layouts.concept.index', compact('concepts'));
+        return view('layouts.concept.index', compact('concepts', 'movementTypes'));
     }
 
     public function store(Request $request)
@@ -45,7 +46,8 @@ class ConceptController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'code' => 'required|string|unique:concepts,code|max:255',
-            'type' => ['required', Rule::in([Concept::TYPE_INCOME, Concept::TYPE_EXPENSE])],
+            'type' => ['required', Rule::in(array_keys(Concept::movementTypes()))],
+            'allows_carboy' => 'required|boolean',
         ]);
 
         Concept::create($validated);
@@ -56,8 +58,9 @@ class ConceptController extends Controller
     public function edit(Concept $concept)
     {
         $concepts = Concept::orderBy('name')->get();
+        $movementTypes = Concept::movementTypes();
 
-        return view('layouts.concept.index', compact('concepts', 'concept'));
+        return view('layouts.concept.index', compact('concepts', 'concept', 'movementTypes'));
     }
 
     public function update(Request $request, Concept $concept)
@@ -70,7 +73,8 @@ class ConceptController extends Controller
                 'max:255',
                 Rule::unique('concepts', 'code')->ignore($concept->id),
             ],
-            'type' => ['required', Rule::in([Concept::TYPE_INCOME, Concept::TYPE_EXPENSE])],
+            'type' => ['required', Rule::in(array_keys(Concept::movementTypes()))],
+            'allows_carboy' => 'required|boolean',
         ]);
 
         $concept->update($validated);

@@ -18,6 +18,9 @@ return new class extends Migration {
             $table->decimal('cost', 10, 2);
             $table->foreignId('concept_id')->constrained()->onDelete('restrict');
             $table->foreignId('created_by')->constrained('users')->onDelete('cascade');
+            $table->string('external_id')->nullable()->unique();
+            $table->string('latitude')->nullable();
+            $table->string('longitude')->nullable();
             $table->timestamp('timestamp')->useCurrent();
         });
     }

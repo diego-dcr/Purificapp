@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Retorno;
+use App\Models\Output;
 use App\Models\Sale;
 
 class MovementController extends Controller
@@ -18,16 +18,16 @@ class MovementController extends Controller
                 return $sale;
             });
 
-        $retornos = Retorno::with('user', 'route', 'carboyRetornos')
+        $outputs = Output::with('user', 'route', 'carboyOutputs')
             ->orderByDesc('timestamp')
             ->get()
-            ->map(function (Retorno $retorno) {
-                $retorno->carboy_count = $retorno->carboyRetornos->count();
+            ->map(function (Output $output) {
+                $output->carboy_count = $output->carboyOutputs->count();
 
-                return $retorno;
+                return $output;
             });
 
-        return view('layouts.movement.index', compact('sales', 'retornos'));
+        return view('layouts.movement.index', compact('sales', 'outputs'));
     }
 
     public function showSale(Sale $sale)
@@ -37,10 +37,10 @@ class MovementController extends Controller
         return view('layouts.movement.show-sale', compact('sale'));
     }
 
-    public function showRetorno(Retorno $retorno)
+    public function showOutput(Output $output)
     {
-        $retorno->load('user', 'route', 'carboyRetornos');
+        $output->load('user', 'route', 'carboyOutputs');
 
-        return view('layouts.movement.show-retorno', compact('retorno'));
+        return view('layouts.movement.show-output', compact('output'));
     }
 }

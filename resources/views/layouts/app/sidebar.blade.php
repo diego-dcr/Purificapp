@@ -132,8 +132,8 @@
                     Estadisticas
                 </flux:sidebar.item>
 
-                <flux:sidebar.item icon="trophy" :href="route('dashboard')"
-                    :current="request()->routeIs('dashboard')" wire:navigate>
+                <flux:sidebar.item icon="trophy" :href="route('delivery-kpi.index')"
+                    :current="request()->routeIs('delivery-kpi.*')" wire:navigate>
                     KPIs
                 </flux:sidebar.item>
             </flux:sidebar.group>

@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Retornos;
 
-use App\Models\Retorno;
+use App\Models\Output;
 use App\Models\Route;
 use App\Models\User;
 use App\Models\CarboyOutput;
@@ -16,7 +16,7 @@ use Livewire\Component;
 #[Title('Salidas')]
 class Index extends Component
 {
-    public ?int $editingRetornoId = null;
+    public ?int $editingOutputId = null;
 
     public string $user_id = '';
 
@@ -33,14 +33,14 @@ class Index extends Component
         $this->showForm = true;
     }
 
-    public function edit(int $retornoId): void
+    public function edit(int $outputId): void
     {
-        $retorno = Retorno::with('carboyRetornos')->findOrFail($retornoId);
+        $output = Output::with('carboyOutputs')->findOrFail($outputId);
 
-        $this->editingRetornoId = $retorno->id;
-        $this->user_id = (string) $retorno->user_id;
-        $this->route_id = $retorno->route_id ? (string) $retorno->route_id : '';
-        $this->carboy_codebars = $retorno->carboyRetornos
+        $this->editingOutputId = $output->id;
+        $this->user_id = (string) $output->user_id;
+        $this->route_id = $output->route_id ? (string) $output->route_id : '';
+        $this->carboy_codebars = $output->carboyOutputs
             ->pluck('carboy_codebar')
             ->values()
             ->toArray();
@@ -83,15 +83,15 @@ class Index extends Component
             'created_by' => Auth::id(),
         ];
 
-        if ($this->editingRetornoId) {
-            $retorno = Retorno::findOrFail($this->editingRetornoId);
-            $retorno->update($payload);
-            $retorno->carboyRetornos()->delete();
-            $message = 'Retorno actualizado exitosamente';
+        if ($this->editingOutputId) {
+            $output = Output::findOrFail($this->editingOutputId);
+            $output->update($payload);
+            $output->carboyOutputs()->delete();
+            $message = 'Output actualizado exitosamente';
         } else {
             $payload['timestamp'] = now();
-            $retorno = Retorno::create($payload);
-            $message = 'Retorno registrado exitosamente';
+            $output = Output::create($payload);
+            $message = 'Output registrado exitosamente';
         }
 
         $codebars = collect($validated['carboy_codebars'] ?? [])
@@ -101,7 +101,7 @@ class Index extends Component
 
         foreach ($codebars as $codebar) {
             CarboyOutput::create([
-                'retorno_id' => $retorno->id,
+                'output_id' => $output->id,
                 'carboy_codebar' => $codebar,
                 'timestamp' => now(),
             ]);
@@ -111,17 +111,17 @@ class Index extends Component
         $this->resetForm();
     }
 
-    public function delete(int $retornoId): void
+    public function delete(int $outputId): void
     {
-        $retorno = Retorno::findOrFail($retornoId);
-        $retorno->carboyRetornos()->delete();
-        $retorno->delete();
+        $output = Output::findOrFail($outputId);
+        $output->carboyOutputs()->delete();
+        $output->delete();
 
-        if ($this->editingRetornoId === $retornoId) {
+        if ($this->editingOutputId === $outputId) {
             $this->resetForm();
         }
 
-        session()->flash('status', 'Retorno eliminado exitosamente');
+        session()->flash('status', 'Output eliminado exitosamente');
     }
 
     public function cancel(): void
@@ -133,7 +133,7 @@ class Index extends Component
     {
         $this->resetValidation();
 
-        $this->editingRetornoId = null;
+        $this->editingOutputId = null;
         $this->user_id = '';
         $this->route_id = '';
         $this->carboy_codebars = [''];
@@ -141,15 +141,15 @@ class Index extends Component
     }
 
     #[Computed]
-    public function retornos()
+    public function outputs()
     {
-        return Retorno::with('user', 'route', 'carboyRetornos')
+        return Output::with('user', 'route', 'carboyOutputs')
             ->orderByDesc('timestamp')
             ->get()
-            ->map(function ($retorno) {
-                $retorno->carboy_count = $retorno->carboyRetornos->count();
+            ->map(function ($output) {
+                $output->carboy_count = $output->carboyOutputs->count();
 
-                return $retorno;
+                return $output;
             });
     }
 

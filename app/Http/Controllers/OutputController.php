@@ -4,29 +4,29 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-use App\Models\Retorno;
+use App\Models\Output;
 use App\Models\User;
 use App\Models\Route;
 use App\Models\CarboyOutput;
 
 use Illuminate\Support\Facades\Auth;
 
-class RetornoController extends Controller
+class OutputController extends Controller
 {
     public function index()
     {
-        $retornos = Retorno::with('user', 'route', 'carboyRetornos')
+        $outputs = Output::with('user', 'route', 'carboyOutputs')
             ->orderBy('timestamp', 'desc')
             ->get()
-            ->map(function ($retorno) {
-                $retorno->carboy_count = $retorno->carboyRetornos->count();
-                return $retorno;
+            ->map(function ($output) {
+                $output->carboy_count = $output->carboyOutputs->count();
+                return $output;
             });
 
         $users = User::all();
         $routes = Route::all();
 
-        return view('layouts.retorno.index', compact('retornos', 'users', 'routes'));
+        return view('layouts.output.index', compact('outputs', 'users', 'routes'));
     }
 
     public function store(Request $request)
@@ -38,7 +38,7 @@ class RetornoController extends Controller
             'carboy_codebars.*' => 'string|max:255',
         ]);
 
-        $retorno = Retorno::create([
+        $output = Output::create([
             'user_id' => $validated['user_id'],
             'route_id' => $validated['route_id'] ?? null,
             'created_by' => Auth::id(),
@@ -48,33 +48,33 @@ class RetornoController extends Controller
         if (!empty($validated['carboy_codebars'])) {
             foreach ($validated['carboy_codebars'] as $codebar) {
                 CarboyOutput::create([
-                    'retorno_id' => $retorno->id,
+                    'output_id' => $output->id,
                     'carboy_codebar' => $codebar,
                     'timestamp' => now(),
                 ]);
             }
         }
 
-        return redirect()->route('retornos.index')->with('success', 'Retorno registrado exitosamente');
+        return redirect()->route('retornos.index')->with('success', 'Output registrado exitosamente');
     }
 
-    public function edit(Retorno $retorno)
+    public function edit(Output $output)
     {
-        $retorno->load('user', 'route', 'carboyRetornos');
+        $output->load('user', 'route', 'carboyOutputs');
         $users = User::all();
         $routes = Route::all();
-        $retornos = Retorno::with('user', 'route', 'carboyRetornos')
+        $outputs = Output::with('user', 'route', 'carboyOutputs')
             ->orderBy('timestamp', 'desc')
             ->get()
             ->map(function ($item) {
-                $item->carboy_count = $item->carboyRetornos->count();
+                $item->carboy_count = $item->carboyOutputs->count();
                 return $item;
             });
 
-        return view('layouts.retorno.index', compact('retorno', 'retornos', 'users', 'routes'));
+        return view('layouts.output.index', compact('output', 'outputs', 'users', 'routes'));
     }
 
-    public function update(Request $request, Retorno $retorno)
+    public function update(Request $request, Output $output)
     {
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
@@ -83,32 +83,32 @@ class RetornoController extends Controller
             'carboy_codebars.*' => 'string|max:255',
         ]);
 
-        $retorno->update([
+        $output->update([
             'user_id' => $validated['user_id'],
             'route_id' => $validated['route_id'] ?? null,
             'created_by' => Auth::id(),
         ]);
 
         if (!empty($validated['carboy_codebars'])) {
-            $retorno->carboyRetornos()->delete();
+            $output->carboyOutputs()->delete();
 
             foreach ($validated['carboy_codebars'] as $codebar) {
                 CarboyOutput::create([
-                    'retorno_id' => $retorno->id,
+                    'output_id' => $output->id,
                     'carboy_codebar' => $codebar,
                     'timestamp' => now(),
                 ]);
             }
         }
 
-        return redirect()->route('retornos.index')->with('success', 'Retorno actualizado exitosamente');
+        return redirect()->route('retornos.index')->with('success', 'Output actualizado exitosamente');
     }
 
-    public function destroy(Retorno $retorno)
+    public function destroy(Output $output)
     {
-        $retorno->carboyRetornos()->delete();
-        $retorno->delete();
+        $output->carboyOutputs()->delete();
+        $output->delete();
 
-        return redirect()->route('retornos.index')->with('success', 'Retorno eliminado exitosamente');
+        return redirect()->route('retornos.index')->with('success', 'Output eliminado exitosamente');
     }
 }

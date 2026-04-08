@@ -7,14 +7,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SystemIncome extends Model
 {
-    protected $table = 'system_incomes';
+    protected $table = 'incomes';
 
     public $timestamps = false;
 
     protected $fillable = [
         'concept_id',
+        'customer_id',
+        'user_id',
         'description',
         'amount',
+        'created_by',
         'timestamp',
     ];
 

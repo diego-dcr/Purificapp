@@ -2,18 +2,58 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Lot;
+use App\Models\CarboyOutput;
+use App\Models\CarboySale;
 use App\Models\Carboy;
+use App\Models\Lot;
 use Illuminate\Http\Request;
 
 class CarboyController extends Controller
 {
     public function index()
     {
+        $traceCode = trim((string) request('trace_code', ''));
         $lots = Lot::orderBy('lot_number')->get();
         $carboys = Carboy::with('lot')->orderByDesc('id')->get();
 
-        return view('layouts.carboy.index', compact('lots', 'carboys'));
+        $carboyHistory = collect();
+
+        if ($traceCode !== '') {
+            $salesHistory = CarboySale::with(['sale.user', 'sale.customer', 'sale.route'])
+                ->where('carboy_codebar', $traceCode)
+                ->get()
+                ->map(function (CarboySale $entry) {
+                    return [
+                        'movement_type' => 'Venta',
+                        'movement_id' => $entry->sale_id,
+                        'timestamp' => $entry->timestamp ?? $entry->sale?->timestamp,
+                        'user_name' => $entry->sale?->user?->name,
+                        'route_name' => $entry->sale?->route?->name,
+                        'customer_name' => $entry->sale?->customer?->name,
+                    ];
+                });
+
+            $returnsHistory = CarboyOutput::with(['output.user', 'output.route'])
+                ->where('carboy_codebar', $traceCode)
+                ->get()
+                ->map(function (CarboyOutput $entry) {
+                    return [
+                        'movement_type' => 'Retorno',
+                        'movement_id' => $entry->output_id,
+                        'timestamp' => $entry->timestamp ?? $entry->output?->timestamp,
+                        'user_name' => $entry->output?->user?->name,
+                        'route_name' => $entry->output?->route?->name,
+                        'customer_name' => null,
+                    ];
+                });
+
+            $carboyHistory = $salesHistory
+                ->concat($returnsHistory)
+                ->sortByDesc('timestamp')
+                ->values();
+        }
+
+        return view('layouts.carboy.index', compact('lots', 'carboys', 'traceCode', 'carboyHistory'));
     }
 
     public function store(Request $request)

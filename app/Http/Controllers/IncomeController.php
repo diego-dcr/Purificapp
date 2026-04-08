@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Concept;
+use App\Models\Income;
 use App\Models\Sale;
-use App\Models\SystemIncome;
 use Illuminate\Http\Request;
 
 class IncomeController extends Controller
@@ -15,7 +15,7 @@ class IncomeController extends Controller
             ->orderByDesc('timestamp')
             ->get();
 
-        $systemIncomes = SystemIncome::with('concept')
+        $systemIncomes = Income::with('concept')
             ->orderByDesc('timestamp')
             ->get();
 
@@ -61,18 +61,18 @@ class IncomeController extends Controller
 
         $validated['timestamp'] = $validated['timestamp'] ?? now();
 
-        SystemIncome::create($validated);
+        Income::create($validated);
 
         return redirect()->route('incomes.index')->with('success', 'Ingreso agregado exitosamente');
     }
 
-    public function edit(SystemIncome $systemIncome)
+    public function edit(Income $systemIncome)
     {
         $automaticIncomes = Sale::with('concept', 'customer', 'user')
             ->orderByDesc('timestamp')
             ->get();
 
-        $systemIncomes = SystemIncome::with('concept')
+        $systemIncomes = Income::with('concept')
             ->orderByDesc('timestamp')
             ->get();
 
@@ -105,7 +105,7 @@ class IncomeController extends Controller
         ));
     }
 
-    public function update(Request $request, SystemIncome $systemIncome)
+    public function update(Request $request, Income $systemIncome)
     {
         $validated = $request->validate([
             'concept_id' => [
@@ -124,7 +124,7 @@ class IncomeController extends Controller
         return redirect()->route('incomes.index')->with('success', 'Ingreso actualizado exitosamente');
     }
 
-    public function destroy(SystemIncome $systemIncome)
+    public function destroy(Income $systemIncome)
     {
         $systemIncome->delete();
 

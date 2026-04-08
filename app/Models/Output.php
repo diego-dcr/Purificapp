@@ -6,19 +6,18 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Retorno extends Model
+class Output extends Model
 {
-    protected $table = 'retornos';
+    protected $table = 'outputs';
 
     public $timestamps = false;
 
     protected $fillable = [
         'user_id',
         'route_id',
-        'created_by',
-        'external_id',
         'latitude',
         'longitude',
+        'created_by',
         'timestamp',
     ];
 
@@ -36,8 +35,8 @@ class Retorno extends Model
         return $this->belongsTo(Route::class)->withDefault();
     }
 
-    public function carboyRetornos(): HasMany
+    public function carboyOutputs(): HasMany
     {
-        return $this->hasMany(CarboyOutput::class, 'retorno_id');
+        return $this->hasMany(CarboyOutput::class, 'output_id');
     }
 }

@@ -17,6 +17,74 @@
             </article>
         </section>
 
+        <section class="rounded-xl border border-neutral-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-zinc-900">
+            <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+                <div>
+                    <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50">Rastreo de garrafon</h2>
+                    <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Ingresa el codigo para ver su historial de ventas y retornos.</p>
+                </div>
+
+                <form method="GET" action="{{ route('carboys.index') }}" class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+                    <input
+                        name="trace_code"
+                        type="text"
+                        value="{{ $traceCode ?? '' }}"
+                        placeholder="Codigo de barras"
+                        class="block w-full min-w-60 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-xs outline-none transition focus:border-zinc-400 focus:ring-2 focus:ring-accent focus:ring-offset-2 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-zinc-600 dark:focus:ring-offset-zinc-900"
+                    />
+                    <div class="flex gap-2">
+                        <flux:button type="submit" variant="primary" color="sky" size="sm" icon="magnifying-glass">
+                            Rastrear
+                        </flux:button>
+                        @if (!empty($traceCode))
+                            <flux:button type="button" variant="ghost" size="sm" onclick="window.location.href='{{ route('carboys.index') }}'">
+                                Limpiar
+                            </flux:button>
+                        @endif
+                    </div>
+                </form>
+            </div>
+
+            @if (!empty($traceCode))
+                <div class="mt-5 overflow-x-auto">
+                    <table class="min-w-full divide-y divide-neutral-200 text-sm dark:divide-neutral-700">
+                        <thead class="bg-zinc-50 dark:bg-zinc-800/70">
+                            <tr class="text-left text-zinc-500 dark:text-zinc-400">
+                                <th class="px-4 py-3 font-medium">Fecha</th>
+                                <th class="px-4 py-3 font-medium">Movimiento</th>
+                                <th class="px-4 py-3 font-medium">ID</th>
+                                <th class="px-4 py-3 font-medium">Usuario</th>
+                                <th class="px-4 py-3 font-medium">Cliente</th>
+                                <th class="px-4 py-3 font-medium">Ruta</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-neutral-200 dark:divide-neutral-700">
+                            @forelse ($carboyHistory as $event)
+                                <tr>
+                                    <td class="px-4 py-3 text-zinc-700 dark:text-zinc-300">{{ $event['timestamp']?->format('Y-m-d H:i') ?? '—' }}</td>
+                                    <td class="px-4 py-3">
+                                        <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium {{ $event['movement_type'] === 'Venta' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-300' : 'bg-sky-100 text-sky-700 dark:bg-sky-950/70 dark:text-sky-300' }}">
+                                            {{ $event['movement_type'] }}
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-3 text-zinc-700 dark:text-zinc-300">#{{ $event['movement_id'] }}</td>
+                                    <td class="px-4 py-3 text-zinc-700 dark:text-zinc-300">{{ $event['user_name'] ?? '—' }}</td>
+                                    <td class="px-4 py-3 text-zinc-700 dark:text-zinc-300">{{ $event['customer_name'] ?? '—' }}</td>
+                                    <td class="px-4 py-3 text-zinc-700 dark:text-zinc-300">{{ $event['route_name'] ?? '—' }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="6" class="px-4 py-8 text-center text-zinc-500 dark:text-zinc-400">
+                                        No se encontraron movimientos para el codigo {{ $traceCode }}.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+        </section>
+
         <section class="grid gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(320px,0.9fr)]">
             <div
                 class="rounded-xl border border-neutral-200 bg-white shadow-sm dark:border-neutral-700 dark:bg-zinc-900">

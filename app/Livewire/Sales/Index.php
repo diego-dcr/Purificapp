@@ -94,6 +94,11 @@ class Index extends Component
             'carboy_codebars.*' => 'nullable|string|max:255',
         ]);
 
+        $concept = Concept::query()
+            ->whereKey((int) $validated['concept_id'])
+            ->where('type', Concept::TYPE_INCOME)
+            ->firstOrFail();
+
         $payload = [
             'user_id' => (int) $validated['user_id'],
             'route_id' => $validated['route_id'] !== '' ? (int) $validated['route_id'] : null,
@@ -114,10 +119,12 @@ class Index extends Component
             $message = 'Entrega/Venta registrada exitosamente';
         }
 
-        $codebars = collect($validated['carboy_codebars'] ?? [])
-            ->map(fn($codebar) => trim((string) $codebar))
-            ->filter()
-            ->values();
+        $codebars = $concept->allows_carboy
+            ? collect($validated['carboy_codebars'] ?? [])
+                ->map(fn ($codebar) => trim((string) $codebar))
+                ->filter()
+                ->values()
+            : collect();
 
         foreach ($codebars as $codebar) {
             CarboySale::create([
@@ -197,7 +204,27 @@ class Index extends Component
     #[Computed]
     public function concepts()
     {
-        return Concept::orderBy('name')->get();
+        return Concept::where('type', Concept::TYPE_INCOME)
+            ->orderBy('name')
+            ->get();
+    }
+
+    #[Computed]
+    public function selectedConceptAllowsCarboys(): bool
+    {
+        if ($this->concept_id === '') {
+            return true;
+        }
+
+        return (bool) $this->concepts
+            ->firstWhere('id', (int) $this->concept_id)?->allows_carboy;
+    }
+
+    public function updatedConceptId(): void
+    {
+        if (!$this->selectedConceptAllowsCarboys) {
+            $this->carboy_codebars = [''];
+        }
     }
 
 public function showDetails($saleId)

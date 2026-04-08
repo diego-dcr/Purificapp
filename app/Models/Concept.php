@@ -10,10 +10,25 @@ class Concept extends Model
 
     public const TYPE_INCOME = 'income';
     public const TYPE_EXPENSE = 'expense';
+    public const TYPE_NONE = 'none';
     
     protected $fillable = [
         'name',
         'code',
         'type',
+        'allows_carboy',
     ];
+
+    protected $casts = [
+        'allows_carboy' => 'bool',
+    ];
+
+    public static function movementTypes(): array
+    {
+        return [
+            self::TYPE_INCOME => 'Ingreso',
+            self::TYPE_EXPENSE => 'Egreso',
+            self::TYPE_NONE => 'Sin movimiento',
+        ];
+    }
 }

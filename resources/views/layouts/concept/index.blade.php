@@ -47,7 +47,8 @@
                             <tr class="text-left text-zinc-500 dark:text-zinc-400">
                                 <th class="px-6 py-3 font-medium">Nombre</th>
                                 <th class="px-6 py-3 font-medium">Código</th>
-                                <th class="px-6 py-3 font-medium">Tipo</th>
+                                <th class="px-6 py-3 font-medium">Movimiento</th>
+                                <th class="px-6 py-3 font-medium">Permite garrafón</th>
                                 <th class="px-6 py-3 font-medium">Actualizado</th>
                                 <th class="px-6 py-3 font-medium text-right">Acciones</th>
                             </tr>
@@ -62,10 +63,13 @@
                                         <code class="text-xs font-mono bg-zinc-100 px-2 py-1 rounded dark:bg-zinc-800">{{ $conceptItem->code }}</code>
                                     </td>
                                     <td class="px-6 py-4 text-zinc-600 dark:text-zinc-300">
-                                        @if ($conceptItem->type === 'expense')
-                                            Egreso
+                                        {{ $movementTypes[$conceptItem->type] ?? 'Sin definir' }}
+                                    </td>
+                                    <td class="px-6 py-4 text-zinc-600 dark:text-zinc-300">
+                                        @if ($conceptItem->allows_carboy)
+                                            Sí
                                         @else
-                                            Ingreso
+                                            No
                                         @endif
                                     </td>
                                     <td class="px-6 py-4 text-xs text-zinc-500 dark:text-zinc-400">
@@ -92,7 +96,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="px-6 py-8 text-center text-zinc-500 dark:text-zinc-400">
+                                    <td colspan="6" class="px-6 py-8 text-center text-zinc-500 dark:text-zinc-400">
                                         No hay conceptos registrados.
                                     </td>
                                 </tr>
@@ -135,12 +139,22 @@
                         placeholder="VENTA" value="{{ isset($concept) ? $concept->code : '' }}" />
 
                     <div>
-                        <label class="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Tipo</label>
+                        <label class="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Movimiento</label>
                         <select name="type" required
                             class="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-xs outline-none transition focus:border-zinc-400 focus:ring-2 focus:ring-accent focus:ring-offset-2 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-zinc-600 dark:focus:ring-offset-zinc-900">
-                            <option value="">Selecciona un tipo</option>
-                            <option value="income" @if ((isset($concept) && $concept->type === 'income') || !isset($concept)) selected @endif>Ingreso</option>
-                            <option value="expense" @if (isset($concept) && $concept->type === 'expense') selected @endif>Egreso</option>
+                            <option value="">Selecciona un movimiento</option>
+                            @foreach ($movementTypes as $movementType => $label)
+                                <option value="{{ $movementType }}" @selected((isset($concept) ? $concept->type : old('type', 'income')) === $movementType)>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Permite garrafón</label>
+                        <select name="allows_carboy" required
+                            class="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-xs outline-none transition focus:border-zinc-400 focus:ring-2 focus:ring-accent focus:ring-offset-2 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-zinc-600 dark:focus:ring-offset-zinc-900">
+                            <option value="1" @selected((int) (isset($concept) ? $concept->allows_carboy : old('allows_carboy', 0)) === 1)>Sí</option>
+                            <option value="0" @selected((int) (isset($concept) ? $concept->allows_carboy : old('allows_carboy', 0)) === 0)>No</option>
                         </select>
                     </div>
 

@@ -145,20 +145,26 @@
 
                     <flux:input wire:model="cost" label="Costo" type="number" step="0.01" min="0" required />
 
-                    <div>
-                        <label class="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Códigos de barras</label>
-                        <div class="space-y-2">
-                            @foreach ($carboy_codebars as $index => $codebar)
-                                <div class="flex gap-2">
-                                    <input wire:model="carboy_codebars.{{ $index }}" type="text" placeholder="Código de barra" class="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100" />
-                                    @if (count($carboy_codebars) > 1)
-                                        <flux:button type="button" size="sm" variant="danger" wire:click="removeCarboyInput({{ $index }})">-</flux:button>
-                                    @endif
-                                </div>
-                            @endforeach
+                    @if ($this->selectedConceptAllowsCarboys)
+                        <div>
+                            <label class="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Códigos de barras</label>
+                            <div class="space-y-2">
+                                @foreach ($carboy_codebars as $index => $codebar)
+                                    <div class="flex gap-2">
+                                        <input wire:model="carboy_codebars.{{ $index }}" type="text" placeholder="Código de barra" class="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100" />
+                                        @if (count($carboy_codebars) > 1)
+                                            <flux:button type="button" size="sm" variant="danger" wire:click="removeCarboyInput({{ $index }})">-</flux:button>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
+                            <flux:button type="button" size="sm" variant="ghost" class="mt-2" wire:click="addCarboyInput">+ Agregar garrafón</flux:button>
                         </div>
-                        <flux:button type="button" size="sm" variant="ghost" class="mt-2" wire:click="addCarboyInput">+ Agregar garrafón</flux:button>
-                    </div>
+                    @else
+                        <div class="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-300">
+                            Este concepto no permite registrar garrafones.
+                        </div>
+                    @endif
 
                     <div class="flex justify-end gap-3">
                         <flux:button type="button" size="sm" variant="danger" wire:click="cancel">Cancelar</flux:button>

@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Route;
 // Controllers
 use App\Http\Controllers\ConceptController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DeliveryKpiController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\IncomeController;
 use App\Http\Controllers\LotController;
@@ -19,8 +21,11 @@ use App\Http\Controllers\CarboyController;
 
 Route::view('/', 'welcome')->name('home');
 
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::view('dashboard', 'dashboard')->name('dashboard');
+Route::middleware(['auth'])->group(function () {
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('dashboard/export-finance-report', [DashboardController::class, 'exportFinanceReport'])->name('dashboard.export-finance-report');
+    Route::get('delivery-kpi', [DeliveryKpiController::class, 'index'])->name('delivery-kpi.index');
+    Route::get('delivery-kpi/export-sales-report', [DeliveryKpiController::class, 'exportSalesReport'])->name('delivery-kpi.export-sales-report');
     Route::livewire('users', UsersIndex::class)->name('users.index');
     Route::livewire('roles', RolesIndex::class)->name('roles.index');
     Route::livewire('permissions', PermissionsIndex::class)->name('permissions.index');

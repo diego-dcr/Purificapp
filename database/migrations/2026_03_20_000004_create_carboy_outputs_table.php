@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('carboy_retornos', function (Blueprint $table) {
+        Schema::create('carboy_outputs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('retorno_id')->constrained('retornos')->onDelete('cascade');
+            $table->foreignId('output_id')->constrained('outputs')->onDelete('cascade');
             $table->string('carboy_barcode');
             $table->timestamp('timestamp')->useCurrent();
         });
@@ -24,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('carboy_retornos');
+        Schema::dropIfExists('carboy_outputs');
     }
 };

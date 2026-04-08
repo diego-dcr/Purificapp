@@ -5,14 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Expense extends Model
+class Income extends Model
 {
-    protected $table = 'expenses';
+    protected $table = 'incomes';
 
     public $timestamps = false;
 
     protected $fillable = [
         'concept_id',
+        'customer_id',
+        'user_id',
         'amount',
         'description',
         'created_by',
@@ -27,6 +29,16 @@ class Expense extends Model
     public function concept(): BelongsTo
     {
         return $this->belongsTo(Concept::class);
+    }
+
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function createdBy(): BelongsTo

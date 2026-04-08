@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('retornos', function (Blueprint $table) {
+        Schema::create('outputs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('route_id')->nullable()->constrained('routes')->onDelete('set null');
@@ -20,11 +20,8 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('retornos');
+        Schema::dropIfExists('outputs');
     }
 };

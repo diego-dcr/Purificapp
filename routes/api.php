@@ -14,5 +14,5 @@ Route::prefix('mobile')->group(function (): void {
     Route::get('routes', [MobileCatalogController::class, 'routes']);
 
     Route::post('sales', [MobileSaleController::class, 'store']);
-    Route::post('retornos', [MobileRetornoController::class, 'store']);
+    Route::post('outputs', [MobileRetornoController::class, 'store']);
 });

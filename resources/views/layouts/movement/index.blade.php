@@ -10,7 +10,7 @@
 
             <article class="rounded-xl border border-neutral-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-zinc-900">
                 <p class="text-sm text-zinc-500 dark:text-zinc-400">Retornos</p>
-                <p class="mt-3 text-3xl font-semibold text-zinc-900 dark:text-zinc-50">{{ count($retornos) }}</p>
+                <p class="mt-3 text-3xl font-semibold text-zinc-900 dark:text-zinc-50">{{ count($outputs) }}</p>
                 <p class="mt-1 text-sm text-sky-600 dark:text-sky-400">Total registradas</p>
             </article>
 
@@ -22,7 +22,7 @@
 
             <article class="rounded-xl border border-neutral-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-zinc-900">
                 <p class="text-sm text-zinc-500 dark:text-zinc-400">Garrafones en retornos</p>
-                <p class="mt-3 text-3xl font-semibold text-zinc-900 dark:text-zinc-50">{{ $retornos->sum('carboy_count') }}</p>
+                <p class="mt-3 text-3xl font-semibold text-zinc-900 dark:text-zinc-50">{{ $outputs->sum('carboy_count') }}</p>
                 <p class="mt-1 text-sm text-orange-600 dark:text-orange-400">Códigos ligados</p>
             </article>
         </section>
@@ -91,16 +91,16 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-neutral-200 dark:divide-neutral-700">
-                            @forelse ($retornos as $retornoItem)
+                            @forelse ($outputs as $outputItem)
                                 <tr>
-                                    <td class="px-6 py-4 text-zinc-900 dark:text-zinc-50">#{{ $retornoItem->id }}</td>
-                                    <td class="px-6 py-4 text-zinc-600 dark:text-zinc-300">{{ $retornoItem->user->name ?? '—' }}</td>
-                                    <td class="px-6 py-4 text-center text-zinc-600 dark:text-zinc-300">{{ $retornoItem->carboy_count }}</td>
-                                    <td class="px-6 py-4 text-zinc-600 dark:text-zinc-300">{{ $retornoItem->timestamp?->format('Y-m-d H:i') }}</td>
+                                    <td class="px-6 py-4 text-zinc-900 dark:text-zinc-50">#{{ $outputItem->id }}</td>
+                                    <td class="px-6 py-4 text-zinc-600 dark:text-zinc-300">{{ $outputItem->user->name ?? '—' }}</td>
+                                    <td class="px-6 py-4 text-center text-zinc-600 dark:text-zinc-300">{{ $outputItem->carboy_count }}</td>
+                                    <td class="px-6 py-4 text-zinc-600 dark:text-zinc-300">{{ $outputItem->timestamp?->format('Y-m-d H:i') }}</td>
                                     <td class="px-6 py-4">
                                         <div class="flex justify-end">
                                             <flux:button type="button" size="sm" variant="primary" color="lime" icon="eye"
-                                                onclick="window.location.href='{{ route('movements.retornos.show', $retornoItem) }}'">
+                                                onclick="window.location.href='{{ route('movements.outputs.show', $outputItem) }}'">
                                                 Ver detalles
                                             </flux:button>
                                         </div>

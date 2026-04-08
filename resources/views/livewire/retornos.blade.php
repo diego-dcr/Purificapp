@@ -2,13 +2,13 @@
     <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <article class="rounded-xl border border-neutral-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-zinc-900">
             <p class="text-sm text-zinc-500 dark:text-zinc-400">Retornos registrados</p>
-            <p class="mt-3 text-3xl font-semibold text-zinc-900 dark:text-zinc-50">{{ count($this->retornos) }}</p>
+            <p class="mt-3 text-3xl font-semibold text-zinc-900 dark:text-zinc-50">{{ count($this->outputs) }}</p>
             <p class="mt-1 text-sm text-emerald-600 dark:text-emerald-400">Total en tiempo real</p>
         </article>
 
         <article class="rounded-xl border border-neutral-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-zinc-900">
             <p class="text-sm text-zinc-500 dark:text-zinc-400">Garrafones procesados</p>
-            <p class="mt-3 text-3xl font-semibold text-zinc-900 dark:text-zinc-50">{{ $this->retornos->sum('carboy_count') }}</p>
+            <p class="mt-3 text-3xl font-semibold text-zinc-900 dark:text-zinc-50">{{ $this->outputs->sum('carboy_count') }}</p>
             <p class="mt-1 text-sm text-sky-600 dark:text-sky-400">Total agregado</p>
         </article>
 
@@ -56,18 +56,18 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-neutral-200 dark:divide-neutral-700">
-                        @forelse ($this->retornos as $retornoItem)
+                        @forelse ($this->outputs as $outputItem)
                             <tr>
-                                <td class="px-6 py-4 font-medium text-zinc-900 dark:text-zinc-50">{{ $retornoItem->user->name }}</td>
-                                <td class="px-6 py-4 text-zinc-600 dark:text-zinc-300">{{ $retornoItem->route->name ?? '—' }}</td>
-                                <td class="px-6 py-4 text-center text-zinc-600 dark:text-zinc-300">{{ $retornoItem->carboy_count }}</td>
-                                <td class="px-6 py-4 text-zinc-600 dark:text-zinc-300">{{ $retornoItem->timestamp->format('Y-m-d H:i') }}</td>
+                                <td class="px-6 py-4 font-medium text-zinc-900 dark:text-zinc-50">{{ $outputItem->user->name }}</td>
+                                <td class="px-6 py-4 text-zinc-600 dark:text-zinc-300">{{ $outputItem->route->name ?? '—' }}</td>
+                                <td class="px-6 py-4 text-center text-zinc-600 dark:text-zinc-300">{{ $outputItem->carboy_count }}</td>
+                                <td class="px-6 py-4 text-zinc-600 dark:text-zinc-300">{{ $outputItem->timestamp->format('Y-m-d H:i') }}</td>
                                 <td class="px-6 py-4 align-top">
                                     <div class="flex justify-end gap-2">
-                                        <flux:button type="button" icon="pencil-square" size="sm" variant="filled" class="bg-zinc-500 hover:bg-zinc-600" wire:click="edit({{ $retornoItem->id }})">
+                                        <flux:button type="button" icon="pencil-square" size="sm" variant="filled" class="bg-zinc-500 hover:bg-zinc-600" wire:click="edit({{ $outputItem->id }})">
                                             Editar
                                         </flux:button>
-                                        <flux:button type="button" icon="trash" size="sm" variant="danger" wire:click="delete({{ $retornoItem->id }})" wire:confirm="¿Seguro que deseas eliminar este retorno?">
+                                        <flux:button type="button" icon="trash" size="sm" variant="danger" wire:click="delete({{ $outputItem->id }})" wire:confirm="¿Seguro que deseas eliminar este retorno?">
                                             Eliminar
                                         </flux:button>
                                     </div>
@@ -85,8 +85,8 @@
 
         <aside class="rounded-xl border border-neutral-200 bg-white p-5 dark:border-neutral-700 dark:bg-zinc-900">
             <div>
-                <flux:heading size="lg">{{ $editingRetornoId ? 'Editar retorno' : 'Nuevo retorno' }}</flux:heading>
-                <flux:text class="mt-1">{{ $editingRetornoId ? 'Actualiza los datos del retorno.' : 'Registra un nuevo retorno de garrafones.' }}</flux:text>
+                <flux:heading size="lg">{{ $editingOutputId ? 'Editar retorno' : 'Nuevo retorno' }}</flux:heading>
+                <flux:text class="mt-1">{{ $editingOutputId ? 'Actualiza los datos del retorno.' : 'Registra un nuevo retorno de garrafones.' }}</flux:text>
             </div>
 
             @if (! $showForm)
@@ -132,7 +132,7 @@
 
                     <div class="flex justify-end gap-3">
                         <flux:button type="button" size="sm" variant="danger" wire:click="cancel">Cancelar</flux:button>
-                        <flux:button variant="primary" color="sky" size="sm" type="submit">{{ $editingRetornoId ? 'Actualizar retorno' : 'Guardar retorno' }}</flux:button>
+                        <flux:button variant="primary" color="sky" size="sm" type="submit">{{ $editingOutputId ? 'Actualizar retorno' : 'Guardar retorno' }}</flux:button>
                     </div>
                 </form>
             @endif

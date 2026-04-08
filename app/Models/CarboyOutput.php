@@ -7,12 +7,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class CarboyOutput extends Model
 {
-    protected $table = 'carboy_retornos';
+    protected $table = 'carboy_outputs';
 
     public $timestamps = false;
 
     protected $fillable = [
-        'retorno_id',
+        'output_id',
         'carboy_codebar',
         'timestamp',
     ];
@@ -21,8 +21,8 @@ class CarboyOutput extends Model
         'timestamp' => 'datetime',
     ];
 
-    public function retorno(): BelongsTo
+    public function output(): BelongsTo
     {
-        return $this->belongsTo(Retorno::class);
+        return $this->belongsTo(Output::class);
     }
 }

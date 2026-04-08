@@ -14,8 +14,9 @@ return new class extends Migration
         Schema::create('expenses', function (Blueprint $table) {
             $table->id();
             $table->foreignId('concept_id')->constrained('concepts')->onDelete('restrict');
-            $table->decimal('amount', 10, 2);
+            $table->decimal('amount', 12, 2);
             $table->string('description')->nullable();
+            $table->foreignId('created_by')->constrained('users')->onDelete('cascade');
             $table->timestamp('timestamp')->useCurrent();
         });
     }

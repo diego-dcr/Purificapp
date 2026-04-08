@@ -3,7 +3,7 @@
 namespace App\Livewire\Movements;
 
 use App\Models\Sale;
-use App\Models\Retorno;
+use App\Models\Output;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -15,24 +15,24 @@ class Index extends Component
 {
     public ?int $selectedSaleId = null;
 
-    public ?int $selectedRetornoId = null;
+    public ?int $selectedOutputId = null;
 
     public function showSaleDetails(int $saleId): void
     {
         $this->selectedSaleId = $saleId;
-        $this->selectedRetornoId = null;
+        $this->selectedOutputId = null;
     }
 
-    public function showRetornoDetails(int $retornoId): void
+    public function showOutputDetails(int $outputId): void
     {
-        $this->selectedRetornoId = $retornoId;
+        $this->selectedOutputId = $outputId;
         $this->selectedSaleId = null;
     }
 
     public function closeDetails(): void
     {
         $this->selectedSaleId = null;
-        $this->selectedRetornoId = null;
+        $this->selectedOutputId = null;
     }
 
     #[Computed]
@@ -49,15 +49,15 @@ class Index extends Component
     }
 
     #[Computed]
-    public function retornos()
+    public function outputs()
     {
-        return Retorno::with('user', 'route', 'carboyRetornos')
+        return Output::with('user', 'route', 'carboyOutputs')
             ->orderByDesc('timestamp')
             ->get()
-            ->map(function ($retorno) {
-                $retorno->carboy_count = $retorno->carboyRetornos->count();
+            ->map(function ($output) {
+                $output->carboy_count = $output->carboyOutputs->count();
 
-                return $retorno;
+                return $output;
             });
     }
 
@@ -72,12 +72,12 @@ class Index extends Component
     }
 
     #[Computed]
-    public function selectedRetorno(): ?Retorno
+    public function selectedOutput(): ?Output
     {
-        if (! $this->selectedRetornoId) {
+        if (! $this->selectedOutputId) {
             return null;
         }
 
-        return Retorno::with('carboyRetornos', 'user', 'route')->find($this->selectedRetornoId);
+        return Output::with('carboyOutputs', 'user', 'route')->find($this->selectedOutputId);
     }
 }
