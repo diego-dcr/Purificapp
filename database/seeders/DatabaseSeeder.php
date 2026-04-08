@@ -33,5 +33,9 @@ class DatabaseSeeder extends Seeder
         $admin->syncRoles(['admin']);
 
         $this->call(ConceptSeeder::class);
+
+        if (filter_var(env('SEED_DEMO_DATA', false), FILTER_VALIDATE_BOOL)) {
+            $this->call(DemoDataSeeder::class);
+        }
     }
 }
