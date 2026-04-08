@@ -125,6 +125,7 @@ class DemoDataSeeder extends Seeder
         $expenseConceptIds = Concept::query()->where('type', Concept::TYPE_EXPENSE)->pluck('id')->all();
 
         $customersByRoute = $customers->groupBy('route_id');
+        $carboyCodeHistory = [];
 
         foreach ($routes as $route) {
             $routeCustomers = $customersByRoute->get($route->id, collect());
@@ -159,11 +160,12 @@ class DemoDataSeeder extends Seeder
 
                 if ($hasCarboySalesTable && $carboySalesBarcodeColumn !== null) {
                     $carboyCount = random_int(1, 4);
+                    $saleCodes = $this->buildSaleCarboyCodes($carboyCount, $carboyCodeHistory);
 
-                    for ($j = 1; $j <= $carboyCount; $j++) {
+                    foreach ($saleCodes as $codebar) {
                         $carboySaleData = [
                             'sale_id' => $sale->id,
-                            $carboySalesBarcodeColumn => 'CB-' . Str::upper(Str::random(12)),
+                            $carboySalesBarcodeColumn => $codebar,
                         ];
 
                         if ($carboySalesHasTimestamp) {
@@ -225,5 +227,46 @@ class DemoDataSeeder extends Seeder
                 Expense::query()->create($expenseData);
             }
         }
+    }
+
+    /**
+     * Create 6-digit carboy codes that are both varied and similar.
+     *
+     * Similarity: codes in the same sale share the first 3 digits.
+     * Tracking: some codes are reused from recent history.
+     *
+     * @param array<int, string> $history
+     * @return array<int, string>
+     */
+    private function buildSaleCarboyCodes(int $count, array &$history): array
+    {
+        $codes = [];
+
+        // Reuse some existing codes to make tracing possible across movements.
+        if ($history !== [] && random_int(1, 100) <= 40) {
+            for ($i = 0; $i < $count; $i++) {
+                $codes[] = $history[array_rand($history)];
+            }
+
+            return $codes;
+        }
+
+        // Generate similar 6-digit codes using shared prefix and close suffixes.
+        $prefix = (string) random_int(100, 999);
+        $start = random_int(0, 999);
+
+        for ($i = 0; $i < $count; $i++) {
+            $suffix = ($start + $i) % 1000;
+            $code = $prefix . str_pad((string) $suffix, 3, '0', STR_PAD_LEFT);
+            $codes[] = $code;
+            $history[] = $code;
+        }
+
+        // Keep history bounded so memory does not grow indefinitely.
+        if (count($history) > 1000) {
+            $history = array_slice($history, -1000);
+        }
+
+        return $codes;
     }
 }
