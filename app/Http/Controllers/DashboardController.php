@@ -28,22 +28,25 @@ class DashboardController extends Controller
         $exportToDateInput = trim((string) request('export_to_date', ''));
         [, , , $exportSelectedFromDate, $exportSelectedToDate] = $this->resolveRange($exportFromDateInput, $exportToDateInput);
 
+        $monthExpr = $this->monthExpression('timestamp');
+        $yearExpr = $this->yearExpression('timestamp');
+
         $salesByMonth = Sale::query()
-            ->selectRaw('MONTH(timestamp) as month_number, COUNT(*) as total')
+            ->selectRaw($monthExpr . ' as month_number, COUNT(*) as total')
             ->whereYear('timestamp', $monthlyYear)
-            ->groupBy('month_number')
+            ->groupByRaw($monthExpr)
             ->pluck('total', 'month_number');
 
         $manualIncomeByMonth = Income::query()
-            ->selectRaw('MONTH(timestamp) as month_number, COUNT(*) as total')
+            ->selectRaw($monthExpr . ' as month_number, COUNT(*) as total')
             ->whereYear('timestamp', $monthlyYear)
-            ->groupBy('month_number')
+            ->groupByRaw($monthExpr)
             ->pluck('total', 'month_number');
 
         $expenseByMonth = Expense::query()
-            ->selectRaw('MONTH(timestamp) as month_number, COUNT(*) as total')
+            ->selectRaw($monthExpr . ' as month_number, COUNT(*) as total')
             ->whereYear('timestamp', $monthlyYear)
-            ->groupBy('month_number')
+            ->groupByRaw($monthExpr)
             ->pluck('total', 'month_number');
 
         $monthLabels = [
@@ -84,9 +87,9 @@ class DashboardController extends Controller
         $topCustomerValues = $topCustomers->pluck('carboys_count')->map(fn ($value) => (int) $value)->all();
 
         $availableYears = collect([
-            Sale::query()->selectRaw('YEAR(timestamp) as year_value')->pluck('year_value'),
-            Income::query()->selectRaw('YEAR(timestamp) as year_value')->pluck('year_value'),
-            Expense::query()->selectRaw('YEAR(timestamp) as year_value')->pluck('year_value'),
+            Sale::query()->selectRaw($yearExpr . ' as year_value')->pluck('year_value'),
+            Income::query()->selectRaw($yearExpr . ' as year_value')->pluck('year_value'),
+            Expense::query()->selectRaw($yearExpr . ' as year_value')->pluck('year_value'),
         ])->flatten()
             ->filter()
             ->unique()
@@ -160,5 +163,15 @@ class DashboardController extends Controller
             $fromDate->format('Y-m-d'),
             $toDate->format('Y-m-d'),
         ];
+    }
+
+    private function monthExpression(string $column): string
+    {
+        return 'EXTRACT(MONTH FROM ' . $column . ')';
+    }
+
+    private function yearExpression(string $column): string
+    {
+        return 'EXTRACT(YEAR FROM ' . $column . ')';
     }
 }

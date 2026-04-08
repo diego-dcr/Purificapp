@@ -72,21 +72,24 @@ class DeliveryKpiController extends Controller
 
         // ── 2. Garrafones por mes (uses year extracted from fromDate) ─────────
         $kpiYear = (int) $fromDate->year;
+        $monthExpr = $this->monthExpression('sales.timestamp');
 
         $carboysByMonth = DB::table('carboy_sales')
             ->join('sales', 'sales.id', '=', 'carboy_sales.sale_id')
             ->whereYear('sales.timestamp', $kpiYear)
             ->when($userFilter, fn ($q) => $q->where('sales.user_id', $selectedUserId))
-            ->selectRaw('MONTH(sales.timestamp) as month_number, COUNT(*) as total')
-            ->groupBy('month_number')
+            ->selectRaw($monthExpr . ' as month_number, COUNT(*) as total')
+            ->groupByRaw($monthExpr)
             ->pluck('total', 'month_number');
 
         // ── 3. Ganancias por mes ──────────────────────────────────────────────
+        $salesMonthExpr = $this->monthExpression('timestamp');
+
         $earningsByMonth = DB::table('sales')
             ->whereYear('timestamp', $kpiYear)
             ->when($userFilter, fn ($q) => $q->where('user_id', $selectedUserId))
-            ->selectRaw('MONTH(timestamp) as month_number, SUM(cost) as total')
-            ->groupBy('month_number')
+            ->selectRaw($salesMonthExpr . ' as month_number, SUM(cost) as total')
+            ->groupByRaw($salesMonthExpr)
             ->pluck('total', 'month_number');
 
         $monthLabels     = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
@@ -143,8 +146,8 @@ class DeliveryKpiController extends Controller
         $byDayOfWeek = DB::table('sales')
             ->whereBetween('timestamp', [$fromDate, $toDate])
             ->when($userFilter, fn ($q) => $q->where('user_id', $selectedUserId))
-            ->selectRaw('DAYOFWEEK(timestamp) - 1 as dow, COUNT(*) as total')
-            ->groupBy('dow')
+            ->selectRaw($this->dayOfWeekExpression('timestamp') . ' as dow, COUNT(*) as total')
+            ->groupByRaw($this->dayOfWeekExpression('timestamp'))
             ->pluck('total', 'dow');
 
         $dowLabels = ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'];
@@ -230,5 +233,19 @@ class DeliveryKpiController extends Controller
             $fromDate->format('Y-m-d'),
             $toDate->format('Y-m-d'),
         ];
+    }
+
+    private function monthExpression(string $column): string
+    {
+        return 'EXTRACT(MONTH FROM ' . $column . ')';
+    }
+
+    private function dayOfWeekExpression(string $column): string
+    {
+        return match (DB::connection()->getDriverName()) {
+            'pgsql' => 'EXTRACT(DOW FROM ' . $column . ')',
+            'sqlite' => "CAST(strftime('%w', " . $column . ") AS INTEGER)",
+            default => 'DAYOFWEEK(' . $column . ') - 1',
+        };
     }
 }
