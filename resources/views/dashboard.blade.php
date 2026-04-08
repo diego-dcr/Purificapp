@@ -174,77 +174,97 @@
 
             window.dashboardCharts = window.dashboardCharts || {};
 
+            const destroyIfExists = (key) => {
+                if (window.dashboardCharts[key]) {
+                    window.dashboardCharts[key].destroy();
+                    delete window.dashboardCharts[key];
+                }
+            };
+
             const createCharts = () => {
                 if (typeof window.Chart === 'undefined') {
                     window.setTimeout(createCharts, 100);
                     return;
                 }
 
-                Object.values(window.dashboardCharts).forEach((chart) => chart.destroy());
+                const monthlyCanvas = document.getElementById('monthlyMovementsChart');
+                const totalsCanvas = document.getElementById('totalsChart');
+                const topCustomersCanvas = document.getElementById('topCustomersChart');
 
-                window.dashboardCharts.monthly = new Chart(document.getElementById('monthlyMovementsChart'), {
-                    type: 'bar',
-                    data: {
-                        labels: monthLabels,
-                        datasets: [{
-                            label: 'Ingresos',
-                            data: incomeCountByMonth,
-                            backgroundColor: 'rgba(16, 185, 129, 0.75)'
-                        }, {
-                            label: 'Egresos',
-                            data: expenseCountByMonth,
-                            backgroundColor: 'rgba(239, 68, 68, 0.75)'
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: { precision: 0 }
+                if (monthlyCanvas) {
+                    destroyIfExists('monthly');
+                    window.dashboardCharts.monthly = new Chart(monthlyCanvas, {
+                        type: 'bar',
+                        data: {
+                            labels: monthLabels,
+                            datasets: [{
+                                label: 'Ingresos',
+                                data: incomeCountByMonth,
+                                backgroundColor: 'rgba(16, 185, 129, 0.75)'
+                            }, {
+                                label: 'Egresos',
+                                data: expenseCountByMonth,
+                                backgroundColor: 'rgba(239, 68, 68, 0.75)'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: { precision: 0 }
+                                }
                             }
                         }
-                    }
-                });
+                    });
+                }
 
-                window.dashboardCharts.totals = new Chart(document.getElementById('totalsChart'), {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Ingresos', 'Egresos'],
-                        datasets: [{
-                            data: [totalIncome, totalExpense],
-                            backgroundColor: ['rgba(16, 185, 129, 0.85)', 'rgba(239, 68, 68, 0.85)']
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false
-                    }
-                });
+                if (totalsCanvas) {
+                    destroyIfExists('totals');
+                    window.dashboardCharts.totals = new Chart(totalsCanvas, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Ingresos', 'Egresos'],
+                            datasets: [{
+                                data: [totalIncome, totalExpense],
+                                backgroundColor: ['rgba(16, 185, 129, 0.85)', 'rgba(239, 68, 68, 0.85)']
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false
+                        }
+                    });
+                }
 
-                window.dashboardCharts.topCustomers = new Chart(document.getElementById('topCustomersChart'), {
-                    type: 'bar',
-                    data: {
-                        labels: topCustomerLabels,
-                        datasets: [{
-                            label: 'Garrafones vendidos',
-                            data: topCustomerValues,
-                            backgroundColor: 'rgba(14, 165, 233, 0.8)'
-                        }]
-                    },
-                    options: {
-                        indexAxis: 'y',
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            x: {
-                                beginAtZero: true,
-                                ticks: { precision: 0 }
+                if (topCustomersCanvas) {
+                    destroyIfExists('topCustomers');
+                    window.dashboardCharts.topCustomers = new Chart(topCustomersCanvas, {
+                        type: 'bar',
+                        data: {
+                            labels: Array.isArray(topCustomerLabels) ? topCustomerLabels : [],
+                            datasets: [{
+                                label: 'Garrafones vendidos',
+                                data: Array.isArray(topCustomerValues)
+                                    ? topCustomerValues.map((value) => Number(value) || 0)
+                                    : [],
+                                backgroundColor: 'rgba(14, 165, 233, 0.8)'
+                            }]
+                        },
+                        options: {
+                            indexAxis: 'y',
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                x: {
+                                    beginAtZero: true,
+                                    ticks: { precision: 0 }
+                                }
                             }
                         }
-                    }
-                });
+                    });
+                }
             };
 
             document.addEventListener('DOMContentLoaded', createCharts, { once: true });
