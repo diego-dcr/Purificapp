@@ -10,6 +10,7 @@ use App\Models\Route;
 use App\Models\Sale;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
@@ -22,8 +23,13 @@ class DemoDataSeeder extends Seeder
     {
         $hasIncomesTable = Schema::hasTable('incomes');
         $hasExpensesTable = Schema::hasTable('expenses');
+        $hasCarboySalesTable = Schema::hasTable('carboy_sales');
         $salesHasCreatedBy = Schema::hasColumn('sales', 'created_by');
         $salesHasTimestamp = Schema::hasColumn('sales', 'timestamp');
+        $carboySalesHasTimestamp = $hasCarboySalesTable && Schema::hasColumn('carboy_sales', 'timestamp');
+        $carboySalesBarcodeColumn = $hasCarboySalesTable
+            ? (Schema::hasColumn('carboy_sales', 'carboy_codebar') ? 'carboy_codebar' : 'carboy_barcode')
+            : null;
         $incomesHasCreatedBy = $hasIncomesTable && Schema::hasColumn('incomes', 'created_by');
         $incomesHasTimestamp = $hasIncomesTable && Schema::hasColumn('incomes', 'timestamp');
         $incomesHasCustomerId = $hasIncomesTable && Schema::hasColumn('incomes', 'customer_id');
@@ -149,7 +155,26 @@ class DemoDataSeeder extends Seeder
                     $saleData['timestamp'] = now()->subDays(random_int(0, 90))->subMinutes(random_int(0, 1440));
                 }
 
-                Sale::query()->create($saleData);
+                $sale = Sale::query()->create($saleData);
+
+                if ($hasCarboySalesTable && $carboySalesBarcodeColumn !== null) {
+                    $carboyCount = random_int(1, 4);
+
+                    for ($j = 1; $j <= $carboyCount; $j++) {
+                        $carboySaleData = [
+                            'sale_id' => $sale->id,
+                            $carboySalesBarcodeColumn => 'CB-' . Str::upper(Str::random(12)),
+                        ];
+
+                        if ($carboySalesHasTimestamp) {
+                            $carboySaleData['timestamp'] = $salesHasTimestamp
+                                ? $sale->timestamp
+                                : now()->subDays(random_int(0, 90))->subMinutes(random_int(0, 1440));
+                        }
+
+                        DB::table('carboy_sales')->insert($carboySaleData);
+                    }
+                }
             }
         }
 
