@@ -22,6 +22,14 @@ class DemoDataSeeder extends Seeder
     {
         $hasIncomesTable = Schema::hasTable('incomes');
         $hasExpensesTable = Schema::hasTable('expenses');
+        $salesHasCreatedBy = Schema::hasColumn('sales', 'created_by');
+        $salesHasTimestamp = Schema::hasColumn('sales', 'timestamp');
+        $incomesHasCreatedBy = $hasIncomesTable && Schema::hasColumn('incomes', 'created_by');
+        $incomesHasTimestamp = $hasIncomesTable && Schema::hasColumn('incomes', 'timestamp');
+        $incomesHasCustomerId = $hasIncomesTable && Schema::hasColumn('incomes', 'customer_id');
+        $incomesHasUserId = $hasIncomesTable && Schema::hasColumn('incomes', 'user_id');
+        $expensesHasCreatedBy = $hasExpensesTable && Schema::hasColumn('expenses', 'created_by');
+        $expensesHasTimestamp = $hasExpensesTable && Schema::hasColumn('expenses', 'timestamp');
 
         $manager = User::query()->firstOrCreate(
             ['email' => 'manager.demo@water'],
@@ -122,44 +130,74 @@ class DemoDataSeeder extends Seeder
             for ($i = 1; $i <= 80; $i++) {
                 $customer = $routeCustomers->random();
 
-                Sale::query()->create([
+                $saleData = [
                     'user_id' => $route->user_id,
                     'route_id' => $route->id,
                     'customer_id' => $customer->id,
                     'cost' => random_int(30, 1500),
                     'concept_id' => $incomeConceptIds[array_rand($incomeConceptIds)],
-                    'created_by' => $manager->id,
                     'external_id' => 'S-' . Str::upper(Str::random(16)),
                     'latitude' => (string) (19 + (random_int(0, 350000) / 1000000)),
                     'longitude' => (string) (-99 - (random_int(0, 350000) / 1000000)),
-                    'timestamp' => now()->subDays(random_int(0, 90))->subMinutes(random_int(0, 1440)),
-                ]);
+                ];
+
+                if ($salesHasCreatedBy) {
+                    $saleData['created_by'] = $manager->id;
+                }
+
+                if ($salesHasTimestamp) {
+                    $saleData['timestamp'] = now()->subDays(random_int(0, 90))->subMinutes(random_int(0, 1440));
+                }
+
+                Sale::query()->create($saleData);
             }
         }
 
         if ($hasIncomesTable) {
             for ($i = 1; $i <= 50; $i++) {
-                Income::query()->create([
+                $incomeData = [
                     'concept_id' => $incomeConceptIds[array_rand($incomeConceptIds)],
-                    'customer_id' => random_int(1, 100) <= 75 ? $customers->random()->id : null,
-                    'user_id' => random_int(1, 100) <= 70 ? $deliveryUsers->random()->id : null,
                     'amount' => random_int(20, 5000),
                     'description' => 'Ingreso demo ' . $i,
-                    'created_by' => $manager->id,
-                    'timestamp' => now()->subDays(random_int(0, 90))->subMinutes(random_int(0, 1440)),
-                ]);
+                ];
+
+                if ($incomesHasCustomerId) {
+                    $incomeData['customer_id'] = random_int(1, 100) <= 75 ? $customers->random()->id : null;
+                }
+
+                if ($incomesHasUserId) {
+                    $incomeData['user_id'] = random_int(1, 100) <= 70 ? $deliveryUsers->random()->id : null;
+                }
+
+                if ($incomesHasCreatedBy) {
+                    $incomeData['created_by'] = $manager->id;
+                }
+
+                if ($incomesHasTimestamp) {
+                    $incomeData['timestamp'] = now()->subDays(random_int(0, 90))->subMinutes(random_int(0, 1440));
+                }
+
+                Income::query()->create($incomeData);
             }
         }
 
         if ($hasExpensesTable) {
             for ($i = 1; $i <= 60; $i++) {
-                Expense::query()->create([
+                $expenseData = [
                     'concept_id' => $expenseConceptIds[array_rand($expenseConceptIds)],
                     'amount' => random_int(20, 3000),
                     'description' => 'Egreso demo ' . $i,
-                    'created_by' => $manager->id,
-                    'timestamp' => now()->subDays(random_int(0, 90))->subMinutes(random_int(0, 1440)),
-                ]);
+                ];
+
+                if ($expensesHasCreatedBy) {
+                    $expenseData['created_by'] = $manager->id;
+                }
+
+                if ($expensesHasTimestamp) {
+                    $expenseData['timestamp'] = now()->subDays(random_int(0, 90))->subMinutes(random_int(0, 1440));
+                }
+
+                Expense::query()->create($expenseData);
             }
         }
     }
