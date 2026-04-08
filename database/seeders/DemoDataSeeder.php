@@ -10,6 +10,7 @@ use App\Models\Route;
 use App\Models\Sale;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 class DemoDataSeeder extends Seeder
@@ -19,6 +20,9 @@ class DemoDataSeeder extends Seeder
      */
     public function run(): void
     {
+        $hasIncomesTable = Schema::hasTable('incomes');
+        $hasExpensesTable = Schema::hasTable('expenses');
+
         $manager = User::query()->firstOrCreate(
             ['email' => 'manager.demo@water'],
             [
@@ -133,26 +137,30 @@ class DemoDataSeeder extends Seeder
             }
         }
 
-        for ($i = 1; $i <= 50; $i++) {
-            Income::query()->create([
-                'concept_id' => $incomeConceptIds[array_rand($incomeConceptIds)],
-                'customer_id' => random_int(1, 100) <= 75 ? $customers->random()->id : null,
-                'user_id' => random_int(1, 100) <= 70 ? $deliveryUsers->random()->id : null,
-                'amount' => random_int(20, 5000),
-                'description' => 'Ingreso demo ' . $i,
-                'created_by' => $manager->id,
-                'timestamp' => now()->subDays(random_int(0, 90))->subMinutes(random_int(0, 1440)),
-            ]);
+        if ($hasIncomesTable) {
+            for ($i = 1; $i <= 50; $i++) {
+                Income::query()->create([
+                    'concept_id' => $incomeConceptIds[array_rand($incomeConceptIds)],
+                    'customer_id' => random_int(1, 100) <= 75 ? $customers->random()->id : null,
+                    'user_id' => random_int(1, 100) <= 70 ? $deliveryUsers->random()->id : null,
+                    'amount' => random_int(20, 5000),
+                    'description' => 'Ingreso demo ' . $i,
+                    'created_by' => $manager->id,
+                    'timestamp' => now()->subDays(random_int(0, 90))->subMinutes(random_int(0, 1440)),
+                ]);
+            }
         }
 
-        for ($i = 1; $i <= 60; $i++) {
-            Expense::query()->create([
-                'concept_id' => $expenseConceptIds[array_rand($expenseConceptIds)],
-                'amount' => random_int(20, 3000),
-                'description' => 'Egreso demo ' . $i,
-                'created_by' => $manager->id,
-                'timestamp' => now()->subDays(random_int(0, 90))->subMinutes(random_int(0, 1440)),
-            ]);
+        if ($hasExpensesTable) {
+            for ($i = 1; $i <= 60; $i++) {
+                Expense::query()->create([
+                    'concept_id' => $expenseConceptIds[array_rand($expenseConceptIds)],
+                    'amount' => random_int(20, 3000),
+                    'description' => 'Egreso demo ' . $i,
+                    'created_by' => $manager->id,
+                    'timestamp' => now()->subDays(random_int(0, 90))->subMinutes(random_int(0, 1440)),
+                ]);
+            }
         }
     }
 }
