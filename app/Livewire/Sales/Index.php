@@ -13,11 +13,16 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 #[Layout('layouts.app')]
 #[Title('Entregas / Ventas')]
 class Index extends Component
 {
+    use WithPagination;
+
+    protected string $paginationTheme = 'tailwind';
+
     public ?int $editingSaleId = null;
 
     public string $user_id = '';
@@ -135,6 +140,7 @@ class Index extends Component
         }
 
         session()->flash('status', $message);
+        $this->resetPage();
         $this->resetForm();
     }
 
@@ -148,6 +154,7 @@ class Index extends Component
             $this->resetForm();
         }
 
+        $this->resetPage();
         session()->flash('status', 'Entrega/Venta eliminada exitosamente');
     }
 
@@ -176,7 +183,19 @@ class Index extends Component
         return Sale::with('user', 'route', 'customer', 'concept')
             ->withCount('carboySales as carboy_count')
             ->orderByDesc('timestamp')
-            ->get();
+            ->paginate(100);
+    }
+
+    #[Computed]
+    public function salesTotal(): int
+    {
+        return Sale::query()->count();
+    }
+
+    #[Computed]
+    public function salesCarboyTotal(): int
+    {
+        return CarboySale::query()->count();
     }
 
     #[Computed]

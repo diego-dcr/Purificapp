@@ -2,13 +2,13 @@
     <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <article class="rounded-xl border border-neutral-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-zinc-900">
             <p class="text-sm text-zinc-500 dark:text-zinc-400">Registros de entrega/venta</p>
-            <p class="mt-3 text-3xl font-semibold text-zinc-900 dark:text-zinc-50">{{ count($this->sales) }}</p>
+            <p class="mt-3 text-3xl font-semibold text-zinc-900 dark:text-zinc-50">{{ $this->salesTotal }}</p>
             <p class="mt-1 text-sm text-emerald-600 dark:text-emerald-400">Total en tiempo real</p>
         </article>
 
         <article class="rounded-xl border border-neutral-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-zinc-900">
             <p class="text-sm text-zinc-500 dark:text-zinc-400">Garrafones escaneados</p>
-            <p class="mt-3 text-3xl font-semibold text-zinc-900 dark:text-zinc-50">{{ $this->sales->sum('carboy_count') }}</p>
+            <p class="mt-3 text-3xl font-semibold text-zinc-900 dark:text-zinc-50">{{ $this->salesCarboyTotal }}</p>
             <p class="mt-1 text-sm text-sky-600 dark:text-sky-400">Total agregado</p>
         </article>
 
@@ -98,6 +98,10 @@
                         @endforelse
                     </tbody>
                 </table>
+            </div>
+
+            <div class="border-t border-neutral-200 px-6 py-4 dark:border-neutral-700">
+                {{ $this->sales->links() }}
             </div>
         </div>
 
