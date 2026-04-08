@@ -9,7 +9,6 @@ use App\Models\Income;
 use App\Models\Route;
 use App\Models\Sale;
 use App\Models\User;
-use Faker\Generator;
 use Illuminate\Database\Seeder;
 
 class DemoDataSeeder extends Seeder
@@ -19,8 +18,6 @@ class DemoDataSeeder extends Seeder
      */
     public function run(): void
     {
-        $faker = app(Generator::class);
-
         $manager = User::query()->firstOrCreate(
             ['email' => 'manager.demo@water'],
             [
@@ -79,8 +76,8 @@ class DemoDataSeeder extends Seeder
 
         Income::factory()->count(50)->create([
             'created_by' => $manager->id,
-            'customer_id' => fn () => $faker->boolean(75) ? $customers->random()->id : null,
-            'user_id' => fn () => $faker->boolean(70) ? $deliveryUsers->random()->id : null,
+            'customer_id' => fn () => random_int(1, 100) <= 75 ? $customers->random()->id : null,
+            'user_id' => fn () => random_int(1, 100) <= 70 ? $deliveryUsers->random()->id : null,
         ]);
 
         Expense::factory()->count(60)->create([
