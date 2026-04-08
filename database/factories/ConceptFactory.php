@@ -17,16 +17,16 @@ class ConceptFactory extends Factory
      */
     public function definition(): array
     {
-        $type = fake()->randomElement([
+        $type = $this->faker->randomElement([
             Concept::TYPE_INCOME,
             Concept::TYPE_EXPENSE,
         ]);
 
         return [
-            'name' => fake()->words(2, true),
-            'code' => (string) fake()->unique()->numberBetween(101, 9999),
+            'name' => $this->faker->words(2, true),
+            'code' => (string) $this->faker->unique()->numberBetween(101, 9999),
             'type' => $type,
-            'allows_carboy' => fake()->boolean(20),
+            'allows_carboy' => $this->faker->boolean(20),
         ];
     }
 }

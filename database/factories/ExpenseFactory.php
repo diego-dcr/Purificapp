@@ -25,10 +25,10 @@ class ExpenseFactory extends Factory
                 ->inRandomOrder()
                 ->value('id')
                 ?? Concept::factory()->create(['type' => Concept::TYPE_EXPENSE])->id,
-            'amount' => fake()->randomFloat(2, 20, 3000),
-            'description' => fake()->boolean(75) ? fake()->sentence(5) : null,
+            'amount' => $this->faker->randomFloat(2, 20, 3000),
+            'description' => $this->faker->boolean(75) ? $this->faker->sentence(5) : null,
             'created_by' => User::factory(),
-            'timestamp' => fake()->dateTimeBetween('-90 days', 'now'),
+            'timestamp' => $this->faker->dateTimeBetween('-90 days', 'now'),
         ];
     }
 }

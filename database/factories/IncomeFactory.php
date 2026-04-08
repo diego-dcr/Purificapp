@@ -26,12 +26,12 @@ class IncomeFactory extends Factory
                 ->inRandomOrder()
                 ->value('id')
                 ?? Concept::factory()->create(['type' => Concept::TYPE_INCOME])->id,
-            'customer_id' => fake()->boolean(60) ? Customer::query()->inRandomOrder()->value('id') : null,
-            'user_id' => fake()->boolean(70) ? User::query()->inRandomOrder()->value('id') : null,
-            'amount' => fake()->randomFloat(2, 20, 5000),
-            'description' => fake()->boolean(70) ? fake()->sentence(4) : null,
+            'customer_id' => $this->faker->boolean(60) ? Customer::query()->inRandomOrder()->value('id') : null,
+            'user_id' => $this->faker->boolean(70) ? User::query()->inRandomOrder()->value('id') : null,
+            'amount' => $this->faker->randomFloat(2, 20, 5000),
+            'description' => $this->faker->boolean(70) ? $this->faker->sentence(4) : null,
             'created_by' => User::factory(),
-            'timestamp' => fake()->dateTimeBetween('-90 days', 'now'),
+            'timestamp' => $this->faker->dateTimeBetween('-90 days', 'now'),
         ];
     }
 }

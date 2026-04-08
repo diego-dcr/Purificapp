@@ -20,9 +20,9 @@ class CustomerFactory extends Factory
     {
         return [
             'route_id' => Route::factory(),
-            'barcode' => fake()->unique()->numerify('7############'),
-            'number' => fake()->unique()->numerify('C####'),
-            'name' => fake()->name(),
+            'barcode' => $this->faker->unique()->numerify('7############'),
+            'number' => $this->faker->unique()->numerify('C####'),
+            'name' => $this->faker->name(),
         ];
     }
 }

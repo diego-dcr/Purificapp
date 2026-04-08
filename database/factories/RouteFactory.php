@@ -20,9 +20,9 @@ class RouteFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'name' => 'Ruta ' . fake()->unique()->numberBetween(1, 999),
-            'zone' => fake()->city(),
-            'code' => strtoupper(fake()->unique()->bothify('R-###??')),
+            'name' => 'Ruta ' . $this->faker->unique()->numberBetween(1, 999),
+            'zone' => $this->faker->city(),
+            'code' => strtoupper($this->faker->unique()->bothify('R-###??')),
         ];
     }
 }
