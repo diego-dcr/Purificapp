@@ -4,15 +4,22 @@ namespace App\Livewire\Movements;
 
 use App\Models\Sale;
 use App\Models\Output;
+use App\Models\CarboyOutput;
+use App\Models\CarboySale;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 #[Layout('layouts.app')]
 #[Title('Movimientos')]
 class Index extends Component
 {
+    use WithPagination;
+
+    protected string $paginationTheme = 'tailwind';
+
     public ?int $selectedSaleId = null;
 
     public ?int $selectedOutputId = null;
@@ -38,27 +45,43 @@ class Index extends Component
     #[Computed]
     public function sales()
     {
-        return Sale::with('user', 'customer', 'carboySales')
+        return Sale::with('user', 'customer')
+            ->withCount('carboySales as carboy_count')
             ->orderByDesc('timestamp')
-            ->get()
-            ->map(function ($sale) {
-                $sale->carboy_count = $sale->carboySales->count();
-
-                return $sale;
-            });
+            ->paginate(100, ['*'], 'sales_page');
     }
 
     #[Computed]
     public function outputs()
     {
-        return Output::with('user', 'route', 'carboyOutputs')
+        return Output::with('user', 'route')
+            ->withCount('carboyOutputs as carboy_count')
             ->orderByDesc('timestamp')
-            ->get()
-            ->map(function ($output) {
-                $output->carboy_count = $output->carboyOutputs->count();
+            ->paginate(100, ['*'], 'outputs_page');
+    }
 
-                return $output;
-            });
+    #[Computed]
+    public function salesTotal(): int
+    {
+        return Sale::query()->count();
+    }
+
+    #[Computed]
+    public function outputsTotal(): int
+    {
+        return Output::query()->count();
+    }
+
+    #[Computed]
+    public function salesCarboyTotal(): int
+    {
+        return CarboySale::query()->count();
+    }
+
+    #[Computed]
+    public function outputsCarboyTotal(): int
+    {
+        return CarboyOutput::query()->count();
     }
 
     #[Computed]

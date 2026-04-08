@@ -6,6 +6,7 @@ use App\Models\Concept;
 use App\Models\Customer;
 use App\Models\Expense;
 use App\Models\Income;
+use App\Models\Output;
 use App\Models\Route;
 use App\Models\Sale;
 use App\Models\User;
@@ -23,12 +24,21 @@ class DemoDataSeeder extends Seeder
     {
         $hasIncomesTable = Schema::hasTable('incomes');
         $hasExpensesTable = Schema::hasTable('expenses');
+        $hasOutputsTable = Schema::hasTable('outputs');
         $hasCarboySalesTable = Schema::hasTable('carboy_sales');
+        $hasCarboyOutputsTable = Schema::hasTable('carboy_outputs');
         $salesHasCreatedBy = Schema::hasColumn('sales', 'created_by');
         $salesHasTimestamp = Schema::hasColumn('sales', 'timestamp');
+        $outputsHasCreatedBy = $hasOutputsTable && Schema::hasColumn('outputs', 'created_by');
+        $outputsHasTimestamp = $hasOutputsTable && Schema::hasColumn('outputs', 'timestamp');
+        $outputsHasRouteId = $hasOutputsTable && Schema::hasColumn('outputs', 'route_id');
         $carboySalesHasTimestamp = $hasCarboySalesTable && Schema::hasColumn('carboy_sales', 'timestamp');
+        $carboyOutputsHasTimestamp = $hasCarboyOutputsTable && Schema::hasColumn('carboy_outputs', 'timestamp');
         $carboySalesBarcodeColumn = $hasCarboySalesTable
             ? (Schema::hasColumn('carboy_sales', 'carboy_codebar') ? 'carboy_codebar' : 'carboy_barcode')
+            : null;
+        $carboyOutputsBarcodeColumn = $hasCarboyOutputsTable
+            ? (Schema::hasColumn('carboy_outputs', 'carboy_codebar') ? 'carboy_codebar' : 'carboy_barcode')
             : null;
         $incomesHasCreatedBy = $hasIncomesTable && Schema::hasColumn('incomes', 'created_by');
         $incomesHasTimestamp = $hasIncomesTable && Schema::hasColumn('incomes', 'timestamp');
@@ -225,6 +235,53 @@ class DemoDataSeeder extends Seeder
                 }
 
                 Expense::query()->create($expenseData);
+            }
+        }
+
+        if ($hasOutputsTable) {
+            foreach ($routes as $route) {
+                for ($i = 1; $i <= 30; $i++) {
+                    $outputData = [
+                        'user_id' => $route->user_id,
+                    ];
+
+                    if ($outputsHasRouteId) {
+                        $outputData['route_id'] = $route->id;
+                    }
+
+                    if ($outputsHasCreatedBy) {
+                        $outputData['created_by'] = $manager->id;
+                    }
+
+                    if ($outputsHasTimestamp) {
+                        $outputData['timestamp'] = now()->subDays(random_int(0, 90))->subMinutes(random_int(0, 1440));
+                    }
+
+                    $output = Output::query()->create($outputData);
+
+                    if ($hasCarboyOutputsTable && $carboyOutputsBarcodeColumn !== null) {
+                        $returnCount = random_int(1, 4);
+
+                        for ($j = 0; $j < $returnCount; $j++) {
+                            $codebar = $carboyCodeHistory !== [] && random_int(1, 100) <= 80
+                                ? $carboyCodeHistory[array_rand($carboyCodeHistory)]
+                                : $this->buildSaleCarboyCodes(1, $carboyCodeHistory)[0];
+
+                            $carboyOutputData = [
+                                'output_id' => $output->id,
+                                $carboyOutputsBarcodeColumn => $codebar,
+                            ];
+
+                            if ($carboyOutputsHasTimestamp) {
+                                $carboyOutputData['timestamp'] = $outputsHasTimestamp
+                                    ? $output->timestamp
+                                    : now()->subDays(random_int(0, 90))->subMinutes(random_int(0, 1440));
+                            }
+
+                            DB::table('carboy_outputs')->insert($carboyOutputData);
+                        }
+                    }
+                }
             }
         }
     }
