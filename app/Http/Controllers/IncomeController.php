@@ -13,27 +13,33 @@ class IncomeController extends Controller
     {
         $automaticIncomes = Sale::with('concept', 'customer', 'user')
             ->orderByDesc('timestamp')
-            ->get();
+            ->paginate(100, ['*'], 'automatic_page');
 
         $systemIncomes = Income::with('concept')
             ->orderByDesc('timestamp')
-            ->get();
+            ->paginate(100, ['*'], 'system_page');
 
         $concepts = ConceptController::listByType(Concept::TYPE_INCOME);
 
-        $totalAutomaticIncome = $automaticIncomes->sum('cost');
-        $totalSystemIncome = $systemIncomes->sum('amount');
+        $totalAutomaticIncome = (float) Sale::query()->sum('cost');
+        $totalSystemIncome = (float) Income::query()->sum('amount');
         $totalIncome = $totalAutomaticIncome + $totalSystemIncome;
 
-        $automaticIncomesByConcept = $automaticIncomes
-            ->groupBy(fn ($income) => $income->concept?->name ?? 'Sin concepto')
-            ->map(fn ($items) => $items->sum('cost'))
-            ->sortDesc();
+        $automaticIncomesByConcept = Sale::query()
+            ->leftJoin('concepts', 'concepts.id', '=', 'sales.concept_id')
+            ->selectRaw("COALESCE(concepts.name, 'Sin concepto') as concept_name")
+            ->selectRaw('SUM(sales.cost) as total')
+            ->groupBy('concept_name')
+            ->orderByDesc('total')
+            ->pluck('total', 'concept_name');
 
-        $systemIncomesByConcept = $systemIncomes
-            ->groupBy(fn ($income) => $income->concept?->name ?? 'Sin concepto')
-            ->map(fn ($items) => $items->sum('amount'))
-            ->sortDesc();
+        $systemIncomesByConcept = Income::query()
+            ->leftJoin('concepts', 'concepts.id', '=', 'incomes.concept_id')
+            ->selectRaw("COALESCE(concepts.name, 'Sin concepto') as concept_name")
+            ->selectRaw('SUM(incomes.amount) as total')
+            ->groupBy('concept_name')
+            ->orderByDesc('total')
+            ->pluck('total', 'concept_name');
 
         return view('layouts.finance.income.index', compact(
             'automaticIncomes',
@@ -70,27 +76,33 @@ class IncomeController extends Controller
     {
         $automaticIncomes = Sale::with('concept', 'customer', 'user')
             ->orderByDesc('timestamp')
-            ->get();
+            ->paginate(100, ['*'], 'automatic_page');
 
         $systemIncomes = Income::with('concept')
             ->orderByDesc('timestamp')
-            ->get();
+            ->paginate(100, ['*'], 'system_page');
 
         $concepts = ConceptController::listByType(Concept::TYPE_INCOME);
 
-        $totalAutomaticIncome = $automaticIncomes->sum('cost');
-        $totalSystemIncome = $systemIncomes->sum('amount');
+        $totalAutomaticIncome = (float) Sale::query()->sum('cost');
+        $totalSystemIncome = (float) Income::query()->sum('amount');
         $totalIncome = $totalAutomaticIncome + $totalSystemIncome;
 
-        $automaticIncomesByConcept = $automaticIncomes
-            ->groupBy(fn ($income) => $income->concept?->name ?? 'Sin concepto')
-            ->map(fn ($items) => $items->sum('cost'))
-            ->sortDesc();
+        $automaticIncomesByConcept = Sale::query()
+            ->leftJoin('concepts', 'concepts.id', '=', 'sales.concept_id')
+            ->selectRaw("COALESCE(concepts.name, 'Sin concepto') as concept_name")
+            ->selectRaw('SUM(sales.cost) as total')
+            ->groupBy('concept_name')
+            ->orderByDesc('total')
+            ->pluck('total', 'concept_name');
 
-        $systemIncomesByConcept = $systemIncomes
-            ->groupBy(fn ($income) => $income->concept?->name ?? 'Sin concepto')
-            ->map(fn ($items) => $items->sum('amount'))
-            ->sortDesc();
+        $systemIncomesByConcept = Income::query()
+            ->leftJoin('concepts', 'concepts.id', '=', 'incomes.concept_id')
+            ->selectRaw("COALESCE(concepts.name, 'Sin concepto') as concept_name")
+            ->selectRaw('SUM(incomes.amount) as total')
+            ->groupBy('concept_name')
+            ->orderByDesc('total')
+            ->pluck('total', 'concept_name');
 
         return view('layouts.finance.income.index', compact(
             'automaticIncomes',

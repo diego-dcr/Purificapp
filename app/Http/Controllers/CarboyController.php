@@ -7,6 +7,7 @@ use App\Models\CarboySale;
 use App\Models\Carboy;
 use App\Models\Lot;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 
 class CarboyController extends Controller
 {
@@ -19,8 +20,16 @@ class CarboyController extends Controller
         $carboyHistory = collect();
 
         if ($traceCode !== '') {
+            $carboySalesBarcodeColumn = Schema::hasColumn('carboy_sales', 'carboy_codebar')
+                ? 'carboy_codebar'
+                : 'carboy_barcode';
+
+            $carboyOutputsBarcodeColumn = Schema::hasColumn('carboy_outputs', 'carboy_codebar')
+                ? 'carboy_codebar'
+                : 'carboy_barcode';
+
             $salesHistory = CarboySale::with(['sale.user', 'sale.customer', 'sale.route'])
-                ->where('carboy_codebar', $traceCode)
+                ->where($carboySalesBarcodeColumn, $traceCode)
                 ->get()
                 ->map(function (CarboySale $entry) {
                     return [
@@ -34,7 +43,7 @@ class CarboyController extends Controller
                 });
 
             $returnsHistory = CarboyOutput::with(['output.user', 'output.route'])
-                ->where('carboy_codebar', $traceCode)
+                ->where($carboyOutputsBarcodeColumn, $traceCode)
                 ->get()
                 ->map(function (CarboyOutput $entry) {
                     return [

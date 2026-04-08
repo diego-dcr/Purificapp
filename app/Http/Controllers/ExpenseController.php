@@ -11,8 +11,8 @@ class ExpenseController extends Controller
     public function index()
     {
         $concepts = ConceptController::listByType(Concept::TYPE_EXPENSE);
-        $expenses = Expense::with('concept')->orderByDesc('timestamp')->get();
-        $totalExpense = $expenses->sum('amount');
+        $expenses = Expense::with('concept')->orderByDesc('timestamp')->paginate(100);
+        $totalExpense = (float) Expense::query()->sum('amount');
 
         return view('layouts.finance.expense.index', compact('concepts', 'expenses', 'totalExpense'));
     }
@@ -39,8 +39,8 @@ class ExpenseController extends Controller
     public function edit(Expense $expense)
     {
         $concepts = ConceptController::listByType(Concept::TYPE_EXPENSE);
-        $expenses = Expense::with('concept')->orderByDesc('timestamp')->get();
-        $totalExpense = $expenses->sum('amount');
+        $expenses = Expense::with('concept')->orderByDesc('timestamp')->paginate(100);
+        $totalExpense = (float) Expense::query()->sum('amount');
 
         return view('layouts.finance.expense.index', compact('concepts', 'expenses', 'totalExpense', 'expense'));
     }
